@@ -1,0 +1,402 @@
+{
+ "labels": {
+  "bluelabel": {
+   "banner": "/media/25e128d403d03f80057971ab4b103cac.jpg",
+   "color": "#3d6fd8",
+   "en": "BLUE LABEL CLUB",
+   "logo": "/media/945f9234cba8aef5097570af80df32bd.jpg",
+   "name": "블루라벨클럽",
+   "order": 1,
+   "siteUrl": "https://bluelabel.funn.at/",
+   "tagline": "매주 월·목 정규 방송 · 현재 시즌2 진행 중"
+  },
+  "shoutout": {
+   "banner": "/media/8598860b66d326af33292dd5a1e6632e.jpg",
+   "color": "#e0571c",
+   "en": "SHOUT OUT PROJECT",
+   "logo": "/media/aca9bacc2b480392e31b39630baeeced.jpg",
+   "name": "샤라웃",
+   "order": 2,
+   "siteUrl": "https://shoutoutproject.funn.at/",
+   "tagline": "매주 화·금 정규 방송 · 현재 시즌1 진행 중"
+  }
+ },
+ "members": {
+  "bl01": {
+   "channelUrl": "https://www.youtube.com/@%EA%B0%95%EC%9D%B4-MC",
+   "labelId": "bluelabel",
+   "name": "강이",
+   "order": 1,
+   "photo": "/media/9e0d31e8dcf0b3281741d55e2ae0918c.jpg",
+   "role": "MC"
+  },
+  "bl02": {
+   "channelUrl": "https://www.youtube.com/@%EB%B8%94%EB%A3%A8%EB%9D%BC%EB%B2%A8_%EC%9E%AC%EB%AF%BC",
+   "labelId": "bluelabel",
+   "live": false,
+   "name": "재민",
+   "order": 2,
+   "photo": "/media/cd83632448cb109bfac96a4bddb62a9d.jpg",
+   "role": "멤버"
+  },
+  "bl03": {
+   "channelUrl": "https://www.youtube.com/@%EB%B8%94%EB%A3%A8%EB%9D%BC%EB%B2%A8_%EC%9D%80%ED%91%9C",
+   "labelId": "bluelabel",
+   "name": "은표",
+   "order": 3,
+   "photo": "/media/b7160ac7ec52d605ec591fce5d503c16.jpg",
+   "role": "멤버"
+  },
+  "bl04": {
+   "channelUrl": "https://www.youtube.com/@%EB%B8%94%EB%A3%A8%EB%9D%BC%EB%B2%A8_%EB%B9%A0%EB%94%B0%EB%A7%88%EB%A0%A4%EC%9B%8C",
+   "labelId": "bluelabel",
+   "name": "빠따마려워",
+   "order": 4,
+   "photo": "/media/0670a93b48b1d3b8e49b8e15e49f9aff.jpg",
+   "role": "멤버"
+  },
+  "bl05": {
+   "channelUrl": "https://www.youtube.com/@%EB%B8%94%EB%A3%A8%EB%9D%BC%EB%B2%A8_%EC%9D%80%EA%B2%B0",
+   "labelId": "bluelabel",
+   "name": "은결",
+   "order": 5,
+   "photo": "/media/2c6f3a72ec212fd1b0bdf56ddea1ead9.jpg",
+   "role": "멤버"
+  },
+  "bl06": {
+   "channelUrl": "https://www.youtube.com/@%EB%B8%94%EB%A3%A8%EB%9D%BC%EB%B2%A8_%ED%95%9C%EC%9D%B4",
+   "labelId": "bluelabel",
+   "name": "한이",
+   "order": 6,
+   "photo": "/media/887ad51b993fcdbdc76a0a9977c34b07.jpg",
+   "role": "멤버"
+  },
+  "bl07": {
+   "channelUrl": "https://www.youtube.com/@%EB%B8%94%EB%A3%A8%EB%9D%BC%EB%B2%A8_%EC%A7%84%ED%98%81",
+   "labelId": "bluelabel",
+   "name": "진혁",
+   "order": 7,
+   "photo": "/media/7dcdb2ccfdbd473b82603080a65b5733.jpg",
+   "role": "멤버"
+  },
+  "bl08": {
+   "channelUrl": "https://www.youtube.com/@%EB%B8%94%EB%A3%A8%EB%9D%BC%EB%B2%A8%EC%9D%80%EC%98%A4",
+   "labelId": "bluelabel",
+   "name": "은오",
+   "order": 8,
+   "photo": "/media/2c7ddf73872eb156eb1fad1f79f5a819.jpg",
+   "role": "멤버"
+  },
+  "bl09": {
+   "channelUrl": "https://www.youtube.com/@%EB%B8%94%EB%A3%A8%EB%9D%BC%EB%B2%A8_%EC%84%9C%EC%A7%84",
+   "labelId": "bluelabel",
+   "name": "서진",
+   "order": 9,
+   "photo": "/media/e6c92a2e8c40c0efb292cec56e4f6bd9.jpg",
+   "role": "멤버"
+  },
+  "bl10": {
+   "channelUrl": "https://www.youtube.com/@%EB%B8%94%EB%A3%A8%EB%9D%BC%EB%B2%A8_%EA%B8%B0%EB%B2%94%EC%9D%B4",
+   "labelId": "bluelabel",
+   "name": "기범이",
+   "order": 10,
+   "photo": "/media/1860a223a68940c2e852a805e9c6a963.jpg",
+   "role": "멤버"
+  },
+  "bl11": {
+   "channelUrl": "https://www.youtube.com/@%EB%B8%94%EB%A3%A8%EB%9D%BC%EB%B2%A8_%EC%9B%90%ED%98%B8",
+   "labelId": "bluelabel",
+   "name": "원호",
+   "order": 11,
+   "photo": "/media/7f745f50e57cfe0ce56fe885fbfe60c3.jpg",
+   "role": "멤버"
+  },
+  "bl12": {
+   "channelUrl": "https://www.youtube.com/@%EB%B8%94%EB%A3%A8%EB%9D%BC%EB%B2%A8_%ED%98%84%EC%A4%80",
+   "labelId": "bluelabel",
+   "name": "현준",
+   "order": 12,
+   "photo": "/media/1a8026432c74249d22f0c33aaeab27cf.jpg",
+   "role": "멤버"
+  },
+  "bl13": {
+   "channelUrl": "https://www.youtube.com/@%EB%B8%94%EB%A3%A8%EB%9D%BC%EB%B2%A8_%EC%A4%80%EB%B2%94",
+   "labelId": "bluelabel",
+   "name": "준범",
+   "order": 13,
+   "photo": "/media/17f853f895f9d872d45efe0c8111a2fa.jpg",
+   "role": "멤버"
+  },
+  "bl14": {
+   "channelUrl": "https://www.youtube.com/@%EB%B8%94%EB%A3%A8%EB%9D%BC%EB%B2%A8_%EC%A0%95%EC%9A%B0",
+   "labelId": "bluelabel",
+   "name": "정우",
+   "order": 14,
+   "photo": "/media/25ea2b0e06a4fa3b9804786e2b36f843.jpg",
+   "role": "멤버"
+  },
+  "bl15": {
+   "channelUrl": "https://www.youtube.com/@%EB%B8%94%EB%A3%A8%EB%9D%BC%EB%B2%A8_%EC%A7%80%ED%9B%88",
+   "labelId": "bluelabel",
+   "name": "지훈",
+   "order": 15,
+   "photo": "/media/73ecfb7e29cb1194db6a3fcbda32afe5.jpg",
+   "role": "멤버"
+  },
+  "bl16": {
+   "channelUrl": "https://www.youtube.com/@%EB%B8%94%EB%A3%A8%EB%9D%BC%EB%B2%A8%ED%83%9C%ED%9B%88",
+   "labelId": "bluelabel",
+   "name": "태훈",
+   "order": 16,
+   "photo": "/media/e7c26b0591d0a1170aee4ec718f8a3f7.jpg",
+   "role": "멤버"
+  },
+  "so01": {
+   "channelUrl": "https://www.youtube.com/@Arisha1004",
+   "labelId": "shoutout",
+   "name": "아리샤",
+   "order": 1,
+   "photo": "/media/d7a3e8f804dd2a7f474fa474e8546079.jpg",
+   "role": "대표"
+  },
+  "so02": {
+   "channelUrl": "https://www.youtube.com/@rossia1052",
+   "labelId": "shoutout",
+   "name": "로시아",
+   "order": 2,
+   "photo": "/media/59720223de9a1b07b98a9557b21fa633.jpg",
+   "role": "멤버"
+  },
+  "so03": {
+   "channelUrl": "https://www.youtube.com/@%EC%83%A4%EB%9D%BC%EC%9B%83_%EB%B4%89%EB%8B%AC",
+   "labelId": "shoutout",
+   "name": "봉달&수달",
+   "order": 3,
+   "photo": "/media/53c70ea6a168a383c5c769ebd935701b.jpg",
+   "role": "멤버"
+  },
+  "so04": {
+   "channelUrl": "https://www.youtube.com/@%EC%83%A4%EB%9D%BC%EC%9B%83_%EB%A6%AC%EB%B8%8C",
+   "labelId": "shoutout",
+   "name": "리브",
+   "order": 4,
+   "photo": "/media/c91bd4143b4390267003e053435cd795.jpg",
+   "role": "멤버"
+  },
+  "so05": {
+   "channelUrl": "https://www.youtube.com/@%EC%83%A4%EB%9D%BC%EC%9B%83_%EC%9D%B4%EB%82%98",
+   "labelId": "shoutout",
+   "name": "이나",
+   "order": 5,
+   "photo": "/media/fc0912463f93ca4511037669b4d6275e.jpg",
+   "role": "멤버"
+  },
+  "so06": {
+   "channelUrl": "https://www.youtube.com/@%EC%83%A4%EB%9D%BC%EC%9B%83_%EB%B3%B4%EB%AF%B8",
+   "labelId": "shoutout",
+   "name": "보미",
+   "order": 6,
+   "photo": "/media/88a389c3b7efe70d285302dae75e73ac.jpg",
+   "role": "멤버"
+  },
+  "so07": {
+   "channelUrl": "https://www.youtube.com/@%ED%95%98%EB%8B%88-X5",
+   "labelId": "shoutout",
+   "name": "하니",
+   "order": 7,
+   "photo": "/media/e7da29af3dd81e0b5eb874e29a242b3d.jpg",
+   "role": "멤버"
+  },
+  "so08": {
+   "channelUrl": "https://www.youtube.com/@%EC%83%A4%EB%9D%BC%EC%9B%83-%EC%9C%A0%EC%84%B8%EC%9E%89",
+   "labelId": "shoutout",
+   "name": "유세잉",
+   "order": 8,
+   "photo": "/media/4ccfd7964928747b6b10157315d49d10.jpg",
+   "role": "멤버"
+  },
+  "so09": {
+   "channelUrl": "https://www.youtube.com/@99%EC%9C%A0%EC%84%A4",
+   "labelId": "shoutout",
+   "name": "유설",
+   "order": 9,
+   "photo": "/media/09c3e7ced7e81c2b21aa8f5263f3ef2a.jpg",
+   "role": "멤버"
+  },
+  "so10": {
+   "channelUrl": "https://www.youtube.com/@%EC%83%A4%EB%9D%BC%EC%9B%83_%EC%9C%BC%EB%9C%B8",
+   "labelId": "shoutout",
+   "name": "으뜸",
+   "order": 10,
+   "photo": "/media/6c1dec68b1e267b59c14dde1a4ff31a8.jpg",
+   "role": "멤버"
+  },
+  "so11": {
+   "channelUrl": "https://www.youtube.com/@%EC%83%A4%EB%9D%BC%EC%9B%83_%EB%AF%BC%EC%A3%BC",
+   "labelId": "shoutout",
+   "name": "민주",
+   "order": 11,
+   "photo": "/media/216687926bfa935fc24e2b6d9adfea21.jpg",
+   "role": "멤버"
+  },
+  "so12": {
+   "channelUrl": "https://www.youtube.com/@%EB%80%A8%EC%9E%89%EC%9E%89-q3u",
+   "labelId": "shoutout",
+   "name": "아엘",
+   "order": 12,
+   "photo": "/media/519099595941c4631736ccd27b5bea55.jpg",
+   "role": "멤버"
+  },
+  "so13": {
+   "channelUrl": "https://www.youtube.com/@%EC%83%A4%EB%9D%BC%EC%9B%83_%EC%95%84%EB%A6%B0",
+   "labelId": "shoutout",
+   "name": "아린",
+   "order": 13,
+   "photo": "/media/a9447c22f81a2eba646e61e180a87e85.jpg",
+   "role": "멤버"
+  },
+  "so14": {
+   "channelUrl": "https://www.youtube.com/@%EC%83%A4%EB%9D%BC%EC%9B%83_%EB%AF%B8%EB%AF%B8",
+   "labelId": "shoutout",
+   "name": "미미",
+   "order": 14,
+   "photo": "/media/b9c61f601499d58d8ac95bcc919e1b5e.jpg",
+   "role": "멤버"
+  }
+ },
+ "events": {
+  "ev-bl-s2-1": {
+   "date": "2026-10-05",
+   "labelId": "bluelabel",
+   "link": "",
+   "memo": "시즌2 오픈",
+   "time": "18:30",
+   "title": "시즌2 1회차"
+  },
+  "ev-bl-s2-2": {
+   "date": "2026-10-08",
+   "labelId": "bluelabel",
+   "link": "",
+   "memo": "황금 잭팟 데이",
+   "time": "18:30",
+   "title": "시즌2 2회차"
+  },
+  "ev-bl-s2-3": {
+   "date": "2026-10-12",
+   "labelId": "bluelabel",
+   "link": "",
+   "memo": "퐁당퐁당데이",
+   "time": "18:30",
+   "title": "시즌2 3회차"
+  },
+  "ev-bl-s2-4": {
+   "date": "2026-10-15",
+   "labelId": "bluelabel",
+   "link": "",
+   "memo": "지분전쟁 · 주사위게임",
+   "time": "18:30",
+   "title": "시즌2 4회차"
+  },
+  "ev-bl-s2-5": {
+   "date": "2026-10-19",
+   "labelId": "bluelabel",
+   "link": "",
+   "memo": "정기 방송 (월·목) · 18:00 대기방송",
+   "time": "18:30",
+   "title": "시즌2 5회차"
+  },
+  "ev-bl-s2-6": {
+   "date": "2026-10-22",
+   "labelId": "bluelabel",
+   "link": "",
+   "memo": "정기 방송 (월·목) · 18:00 대기방송",
+   "time": "18:30",
+   "title": "시즌2 6회차"
+  },
+  "ev-bl-s2-7": {
+   "date": "2026-10-26",
+   "labelId": "bluelabel",
+   "link": "",
+   "memo": "정기 방송 (월·목) · 18:00 대기방송",
+   "time": "18:30",
+   "title": "시즌2 7회차"
+  },
+  "ev-bl-s2-8": {
+   "date": "2026-10-29",
+   "labelId": "bluelabel",
+   "link": "",
+   "memo": "정기 방송 (월·목) · 18:00 대기방송",
+   "time": "18:30",
+   "title": "시즌2 8회차"
+  },
+  "ev-bl-super-1002": {
+   "date": "2026-10-02",
+   "labelId": "bluelabel",
+   "link": "",
+   "memo": "합동 방송",
+   "time": "18:00",
+   "title": "슈퍼엑셀 (블루라벨 × 위너컴퍼니)"
+  },
+  "ev-so-1016": {
+   "date": "2026-10-16",
+   "labelId": "shoutout",
+   "link": "",
+   "memo": "매주 화·금",
+   "time": "",
+   "title": "정규 방송"
+  },
+  "ev-so-1020": {
+   "date": "2026-10-20",
+   "labelId": "shoutout",
+   "link": "",
+   "memo": "매주 화·금",
+   "time": "",
+   "title": "정규 방송"
+  },
+  "ev-so-1023": {
+   "date": "2026-10-23",
+   "labelId": "shoutout",
+   "link": "",
+   "memo": "매주 화·금",
+   "time": "",
+   "title": "정규 방송"
+  },
+  "ev-so-1027": {
+   "date": "2026-10-27",
+   "labelId": "shoutout",
+   "link": "",
+   "memo": "매주 화·금",
+   "time": "",
+   "title": "정규 방송"
+  },
+  "ev-so-1030": {
+   "date": "2026-10-30",
+   "labelId": "shoutout",
+   "link": "",
+   "memo": "매주 화·금",
+   "time": "",
+   "title": "정규 방송"
+  },
+  "ev-so-s1-1": {
+   "date": "2026-10-15",
+   "labelId": "shoutout",
+   "link": "",
+   "memo": "",
+   "time": "",
+   "title": "시즌1 1회차 방송"
+  }
+ },
+ "hall": {
+  "bl-s1": {
+   "date": "",
+   "labelId": "bluelabel",
+   "note": "",
+   "photo": "/media/887ad51b993fcdbdc76a0a9977c34b07.jpg",
+   "rank": "우승",
+   "season": "시즌1",
+   "winner": "한이"
+  }
+ },
+ "posts": {},
+ "settings": {}
+}

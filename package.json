@@ -1,0 +1,9 @@
+{
+  "name": "oho-company-site",
+  "private": true,
+  "description": "오호컴퍼니 홈페이지 (Vercel)",
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "@vercel/blob": "2.8.0"
+  }
+}
