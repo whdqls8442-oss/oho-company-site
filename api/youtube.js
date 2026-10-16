@@ -1,13 +1,13 @@
 // GET /api/youtube → 멤버별 유튜브 프로필 사진·구독자 수·라이브 여부
 // - 채널 정보(사진·구독자)는 6시간마다 갱신
-// - 라이브 여부는 90초마다 갱신 (채널 RSS로 최근 영상을 찾고, videos API로 '방송 중'인지 확인)
+// - 라이브 여부는 3분마다 갱신 (채널 RSS로 최근 영상을 찾고, videos API로 '방송 중'인지 확인)
 // 하루 사용량: 멤버 30명 기준 약 3,000~4,000 단위 (무료 한도 10,000)
 const { loadData, getJSON, setJSON, redis, send } = require('./_lib');
 
 const KEY = process.env.YOUTUBE_API_KEY;
 const API = 'https://www.googleapis.com/youtube/v3';
 const CH_KEY = 'oho:yt:ch', LIVE_KEY = 'oho:yt:live', LOCK_KEY = 'oho:yt:lock';
-const CH_TTL = 6 * 3600 * 1000, LIVE_TTL = 90 * 1000;
+const CH_TTL = 6 * 3600 * 1000, LIVE_TTL = 180 * 1000;
 
 function parseChannel(url) {
   try {
