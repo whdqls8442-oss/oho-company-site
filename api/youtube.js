@@ -8,7 +8,7 @@ const KEY = process.env.YOUTUBE_API_KEY;
 const SOOP_ID = process.env.SOOP_CLIENT_ID;
 const API = 'https://www.googleapis.com/youtube/v3';
 const CH_KEY = 'oho:yt:ch', LIVE_KEY = 'oho:yt:live', LOCK_KEY = 'oho:yt:lock';
-const CH_TTL = 6 * 3600 * 1000, LIVE_TTL = 180 * 1000;
+const CH_TTL = 6 * 3600 * 1000, LIVE_TTL = 180 * 1000, SOOP_TTL = 10 * 60 * 1000; // 유튜브 3분, SOOP 10분
 
 function parseChannel(url) {
   try {
@@ -107,7 +107,7 @@ async function refreshLive(channelIds, deepIds = new Set()) {
 }
 
 // ── SOOP: 공식 Open API(broad/list, Public)로 '지금 방송 중인 전체 목록'을 넘겨보며 우리 멤버를 찾음
-// 멤버를 모두 찾으면 바로 멈추고, 못 찾으면 목록 끝까지 확인 (확인 주기는 유튜브와 같은 3분)
+// 멤버를 모두 찾으면 바로 멈추고, 못 찾으면 목록 끝까지 확인 (확인 주기 10분)
 function parseSoop(url) {
   try {
     const u = new URL(url);
@@ -165,11 +165,13 @@ module.exports = async (req, res) => {
           if (Date.now() - liveCache.at > LIVE_TTL) {
             const ids = [...new Set(urls.map(u => ch[u] && ch[u].id).filter(Boolean))];
             const soopIds = [...new Set(members.map(([, m]) => m.soopUrl && parseSoop(m.soopUrl)).filter(Boolean))];
+            const soopDue = Date.now() - (liveCache.soopAt || 0) > SOOP_TTL;
             const [live, soop] = await Promise.all([
               refreshLive(ids, new Set(labels.map(([, l]) => ch[l.ytUrl] && ch[l.ytUrl].id).filter(Boolean))),
-              refreshSoop(soopIds).catch((e) => { soopStat.err = String(e.message || e); return liveCache.soop || {}; }),
+              soopDue ? refreshSoop(soopIds).catch((e) => { soopStat.err = String(e.message || e); return liveCache.soop || {}; }) : (liveCache.soop || {}),
             ]);
-            liveCache = { at: Date.now(), live, soop, soopStat };
+            liveCache = { at: Date.now(), live, soop,
+              soopAt: soopDue ? Date.now() : liveCache.soopAt, soopStat: soopDue ? soopStat : liveCache.soopStat };
             await setJSON(LIVE_KEY, liveCache);
           }
         } finally { await redis(['DEL', LOCK_KEY]).catch(() => {}); }
@@ -197,6 +199,6 @@ module.exports = async (req, res) => {
       const lv = c.id && liveCache.live[c.id];
       labelOut[id] = { photo: c.photo || '', subs: c.subs ?? null, live: !!lv, liveUrl: lv ? `https://www.youtube.com/watch?v=${lv.videoId}` : '', liveTitle: lv ? lv.title : '', thumb: lv ? lv.thumb : '' };
     }
-    send(res, 200, { members: out, labels: labelOut, checkedAt: liveCache.at, soop: liveCache.soopStat || null }, { 'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60' });
+    send(res, 200, { members: out, labels: labelOut, checkedAt: liveCache.at, soop: liveCache.soopStat || null, soopCheckedAt: liveCache.soopAt || null }, { 'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60' });
   } catch (e) { send(res, 200, { members: {}, error: String(e.message || e) }); }
 };
