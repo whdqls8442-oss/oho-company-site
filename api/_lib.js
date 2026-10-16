@@ -6,7 +6,7 @@ const REDIS_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_
 const REDIS_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 const DATA_KEY = 'oho:data';
 const APPS_KEY = 'oho:apps';
-const COLLECTIONS = ['labels', 'members', 'events', 'hall', 'posts', 'settings'];
+const COLLECTIONS = ['labels', 'members', 'events', 'hall', 'posts', 'settings', 'banners'];
 
 // 저장소가 아직 연결되지 않았을 때(처음 배포 직후) 쓰는 임시 메모리
 const mem = {};
