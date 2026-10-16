@@ -137,6 +137,19 @@ h3{font-size:18px}
 .acc-chip{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;padding:3px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
 .acc-chip .live-dot{background:var(--live)}
 @media (max-width:760px){.acc-body{grid-template-columns:1fr}}
+/* official live */
+.ol-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),640px));justify-content:center;gap:16px;margin-bottom:16px;text-align:left}
+.ol-card{display:flex;flex-direction:column;border-radius:12px;overflow:hidden;background:var(--bg);border:1px solid color-mix(in srgb,var(--live) 45%,var(--line));text-decoration:none;color:var(--ink);transition:transform .2s,box-shadow .2s}
+.ol-card:hover{transform:translateY(-3px);box-shadow:0 14px 30px -16px rgba(0,0,0,.35)}
+.ol-thumb{position:relative;display:block;aspect-ratio:16/9;background:#111;overflow:hidden}
+.ol-thumb img{width:100%;height:100%;object-fit:cover;display:block;max-width:none}
+.ol-badge{position:absolute;top:12px;left:12px;font-size:12px;padding:3px 10px}
+.ol-play{position:absolute;inset:0;margin:auto;width:64px;height:64px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;display:grid;place-items:center;font-size:24px;padding-left:4px;opacity:.85}
+.ol-info{display:flex;align-items:center;gap:12px;padding:14px 16px}
+.ol-t{display:flex;flex-direction:column;min-width:0;flex:1}
+.ol-t small{font-size:12px;color:var(--mute)}
+.ol-t b{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ol-go{font-size:12.5px;color:var(--live);font-weight:700;white-space:nowrap}
 /* live */
 .live{margin-block:48px 8px;padding:36px clamp(16px,3vw,32px) 32px;border:1px solid var(--line);border-radius:8px;background:var(--surface);text-align:center}
 .live .x-row,.live .x-sub,.live .chips{justify-content:center}
@@ -693,20 +706,30 @@ function liveItems(){
   S.members.filter(isLive).forEach(m=>{ const l=label(m.labelId); out.push({labelId:m.labelId, url:liveUrlOf(m), media:`<span class="portrait" style="--lc:${esc(lc(m.labelId))}">${mPhoto(m)?`<img src="${blob(mPhoto(m))}" alt="" onerror="this.remove()">`:initial(m.name)}</span>`, name:m.name, sub:yt(m).liveTitle||(l?l.name:''), badge:'LIVE'}); });
   return out;
 }
+function officialLives(){ const L=(S.ytLabels||{}); return S.labels.filter(l=>L[l.id]&&L[l.id].live).map(l=>({l,v:L[l.id]})); }
+function officialLiveCards(f){
+  const list=officialLives().filter(x=>f==='all'||x.l.id===f);
+  if(!list.length) return '';
+  return `<div class="ol-row">${list.map(({l,v})=>`<a class="ol-card" href="${esc(v.liveUrl)}" target="_blank" rel="noopener" style="--lc:${esc(l.color)}">
+    <span class="ol-thumb">${v.thumb?`<img src="${esc(v.thumb)}" alt="" onerror="this.remove()">`:''}<span class="badge-live ol-badge">LIVE</span><span class="ol-play" aria-hidden="true">▶</span></span>
+    <span class="ol-info">${seal(l,'sm')}<span class="ol-t"><small>${esc(l.name)} 공식 채널</small><b>${esc(v.liveTitle||'지금 방송 중')}</b></span><span class="ol-go">방송 보러가기 ↗</span></span>
+  </a>`).join('')}</div>`;
+}
 function viewLive(){
-  const all=liveItems(), f=S.liveFilter;
+  const all=liveItems(), f=S.liveFilter, offl=officialLives();
   const shown=f==='all'?all:all.filter(x=>x.labelId===f);
   const tabs=`<div class="chips" role="group" aria-label="레이블별 방송중인 멤버" style="margin-bottom:16px">
-    <button class="chip" data-act="liveFilter" data-id="all" aria-pressed="${f==='all'}">전체 <b>${all.length}</b></button>
-    ${S.labels.map(l=>`<button class="chip" style="--lc:${esc(l.color)}" data-act="liveFilter" data-id="${esc(l.id)}" aria-pressed="${f===l.id}"><span class="dot"></span>${esc(l.name)} <b>${all.filter(x=>x.labelId===l.id).length}</b></button>`).join('')}
+    <button class="chip" data-act="liveFilter" data-id="all" aria-pressed="${f==='all'}">전체 <b>${all.length+offl.length}</b></button>
+    ${S.labels.map(l=>`<button class="chip" style="--lc:${esc(l.color)}" data-act="liveFilter" data-id="${esc(l.id)}" aria-pressed="${f===l.id}"><span class="dot"></span>${esc(l.name)} <b>${all.filter(x=>x.labelId===l.id).length+offl.filter(x=>x.l.id===l.id).length}</b></button>`).join('')}
   </div>`;
   const rows=shown.map(x=>{ const inner=`${x.media}<span class="li-t"><b>${esc(x.name)}</b><span>${esc(x.sub)}</span></span><span class="badge-live" style="margin-left:auto">${x.badge}</span>${x.url?`<span class="li-go">보러가기 ↗</span>`:''}`;
     return x.url?`<a class="live-item" href="${esc(x.url)}" target="_blank" rel="noopener">${inner}</a>`:`<div class="live-item">${inner}</div>`; }).join('');
   return `<section class="live" id="liveNow" aria-label="현재 방송중인 멤버">
-    <h2 class="x-title x-row"><span>LIVE</span><span class="x-gold">NOW.<i class="x-caret"></i></span></h2>
-    <p class="x-sub"><span class="live-dot ${all.length?'':'off'}"></span>현재 방송중인 멤버 <b>${all.length}</b>명</p>
+    <h2 class="x-title x-row" style="letter-spacing:-.04em;font-size:clamp(30px,5vw,56px)"><span>현재 방송 중인</span><span class="x-gold">채널</span></h2>
+    <p class="x-sub"><span class="live-dot ${all.length+offl.length?'':'off'}"></span>${all.length+offl.length?`현재 방송 중인 채널은 <b>${all.length+offl.length}</b>개입니다.`:'지금은 방송 중인 채널이 없어요.'}</p>
     ${tabs}
-    ${shown.length?`<div class="live-row">${rows}</div>`:`<p class="live-empty" style="margin:0">${f==='all'?'지금은 방송 중인 멤버가 없어요.':'이 레이블은 지금 방송 중인 멤버가 없어요.'}</p>`}
+    ${officialLiveCards(f)}
+    ${shown.length?`<div class="live-row">${rows}</div>`:(officialLives().filter(x=>f==='all'||x.l.id===f).length?'':(f==='all'?'':`<p class="live-empty" style="margin:0">이 레이블은 지금 방송 중인 채널이 없어요.</p>`))}
   </section>`;
 }
 function labelAccordion(){
@@ -753,7 +776,7 @@ function homeBannerForm(){
     onDelete:S.home?.banner?()=>S.db.doc('settings/home').set({banner:null,link:'',alt:''}):null});
 }
 function viewHome(){
-  const live=liveItems().length;
+  const live=liveItems().length+officialLives().length;
   const posts=sortedPosts().slice(0,5).map(p=>`<button class="post-row ${p.pinned?'pinned':''}" data-act="openPost" data-id="${esc(p.id)}">
       <span class="cat ${p.category==='공지'?'notice':''}">${esc(p.category||'일반')}</span><span class="pt">${esc(p.title)}</span><span class="pd">${esc(fmtTs(p.createdAt))}</span></button>`).join('');
   return `${offlineNote()}
@@ -1056,6 +1079,7 @@ function labelForm(l){
       {k:'tagline',label:'한 줄 소개',ph:'레이블 카드에 표시돼요'},
       {k:'color',label:'대표 색상',type:'color',help:'카드·달력·태그에 쓰여요'},
       {k:'siteUrl',label:'레이블 홈페이지 주소',type:'url',ph:'https://'},
+      {k:'ytUrl',label:'레이블 공식 유튜브 채널 주소',type:'url',ph:'https://www.youtube.com/@...',help:'공식 채널이 방송을 켜면 메인 LIVE NOW에 방송 화면이 크게 나와요'},
       {k:'order',label:'표시 순서',type:'number',help:'숫자가 작을수록 앞에 보여요'},
       {k:'logo',label:'원형 로고 이미지 (정사각형 권장)',type:'image'},
       {k:'banner',label:'배너 이미지 (가로 3:1 권장)',type:'image'}],
@@ -1232,7 +1256,7 @@ async function init(){
   S.ready=true; render();
   loadYT(); setInterval(()=>{ if(!document.hidden) loadYT(); },60000);
 }
-async function loadYT(){ try{ const r=await fetch('/api/youtube'); const j=await r.json(); S.yt=j.members||{}; if(!applyDirty()&&!modalState) render(); }catch(e){} }
+async function loadYT(){ try{ const r=await fetch('/api/youtube'); const j=await r.json(); S.yt=j.members||{}; S.ytLabels=j.labels||{}; if(!applyDirty()&&!modalState) render(); }catch(e){} }
 window.addEventListener('hashchange',()=>{ fromHash(); S.labelId=null; S.postId=null; S.memberId=null; render(); });
 setInterval(()=>{ if(S.tab==='home'&&!modalState) render(); },60000);
 init();
