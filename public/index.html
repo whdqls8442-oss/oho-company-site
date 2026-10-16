@@ -151,7 +151,8 @@ h3{font-size:18px}
 .live-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));gap:12px}
 .live-item{display:flex;gap:12px;align-items:center;padding:12px 14px;background:var(--bg);border:1px solid color-mix(in srgb,var(--live) 50%,var(--line));border-radius:4px;text-decoration:none;min-width:0}
 .live-item:hover{border-color:var(--live)}
-.live-item .portrait,.live-item .seal{width:48px;height:48px;font-size:18px}
+.live-item .portrait,.live-item .seal{flex:none;width:48px;height:48px;min-width:48px;aspect-ratio:1;border-radius:50%;font-size:18px;overflow:hidden}
+.live-item .portrait img,.live-item .seal img{width:100%;height:100%;object-fit:cover}
 .live-item .li-t{min-width:0;display:flex;flex-direction:column;gap:2px}
 .live-item .li-t b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .live-item .li-t span{font-size:12px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -181,6 +182,12 @@ h3{font-size:18px}
 .member .nm{font-weight:700;font-size:15px;overflow-wrap:anywhere}
 .member .rl{font-size:11.5px;letter-spacing:.08em;color:var(--gold)}
 .member .links{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.member .links{gap:8px;margin-top:2px}
+.member .links a.plink{display:block;width:28px;height:28px;border:0;transition:transform .15s}
+.member .links a.plink:hover{transform:translateY(-2px)}
+.plink svg,.plink-i svg{display:block;width:100%;height:100%}
+.plink-btn{gap:10px}
+.plink-i{display:block;width:22px;height:22px;flex:none}
 .member .links a{font-size:12px;color:var(--mute);text-decoration:none;border-bottom:1px solid var(--line)}
 .member .links a:hover{color:var(--gold-hi)}
 
@@ -314,21 +321,21 @@ h3{font-size:18px}
 .hall-empty{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:36px 16px;border:1px dashed color-mix(in srgb,var(--gold) 50%,var(--line));border-radius:8px;color:var(--mute);background:linear-gradient(180deg,color-mix(in srgb,var(--gold) 6%,transparent),transparent)}
 .hall-empty .t-crown{color:color-mix(in srgb,var(--gold) 55%,var(--line));width:48px}
 .hall-empty b{color:var(--ink);font-size:16px}
-.trophies{grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr))}
+.trophies{grid-template-columns:repeat(auto-fill,minmax(min(100%,350px),1fr))}
 .trophy.t-gold{color:#f3d58a;border:2px solid transparent;border-radius:14px;padding:30px 24px 28px;
   background:radial-gradient(120% 80% at 50% 0%,#4a3510 0%,#1c1305 55%,#0d0902 100%) padding-box,
   linear-gradient(135deg,#7a5418,#fff1c1 22%,#c0912f 45%,#fff6d6 62%,#9a6a1d 82%,#f3d58a) border-box;
   box-shadow:0 0 0 1px rgba(255,236,170,.25),0 18px 40px -14px rgba(122,84,24,.75),0 0 60px -20px rgba(243,213,138,.6)}
 .t-frame{position:absolute;inset:9px;border:1px solid rgba(243,213,138,.35);border-radius:9px;pointer-events:none}
 .trophy.t-gold .who,.trophy.t-gold .t-rank{background:linear-gradient(180deg,#fff6d2 0%,#f0cd78 38%,#a8741f 52%,#e9c26a 70%,#fff0bf 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
-.trophy.t-gold .who{font-size:34px;font-weight:800;letter-spacing:-.01em;filter:drop-shadow(0 2px 0 rgba(0,0,0,.35))}
-.trophy.t-gold .t-rank{border:0;padding:0;font-size:46px;font-weight:800;letter-spacing:-.02em;line-height:1;margin-top:6px}
+.trophy.t-gold .who{padding:0 .1em;font-size:34px;font-weight:800;letter-spacing:-.01em;filter:drop-shadow(0 2px 0 rgba(0,0,0,.35))}
+.trophy.t-gold .t-rank{border:0;padding:0 .12em;font-size:46px;font-weight:800;letter-spacing:0;line-height:1.2;margin-top:6px;overflow:visible}
 .trophy.t-gold .t-season{color:#e9c26a;letter-spacing:.32em;font-size:12px;text-transform:uppercase}
 .trophy.t-gold .t-crown{width:58px;filter:drop-shadow(0 3px 8px rgba(243,213,138,.55))}
 .trophy.t-gold .t-date,.trophy.t-gold .note{color:#cdb47a}
-.t-photo{position:relative;width:150px;height:118px;display:grid;place-items:center;margin:4px 0}
+.t-photo{position:relative;width:min(300px,100%);height:auto;aspect-ratio:300/240;display:grid;place-items:center;margin:6px 0}
 .t-photo .laurel{position:absolute;inset:0;width:100%;height:100%}
-.trophy.t-gold .ph{width:92px;height:92px;border-radius:50%;object-fit:cover;margin:0;border:3px solid #1c1305;box-shadow:0 0 0 3px #e3b85a,0 0 24px rgba(243,213,138,.55);position:relative}
+.trophy.t-gold .ph{width:190px;height:190px;max-width:64%;max-height:none;aspect-ratio:1;border-radius:50%;object-fit:cover;margin:0;border:3px solid #1c1305;box-shadow:0 0 0 3px #e3b85a,0 0 24px rgba(243,213,138,.55);position:relative}
 .ph-init{display:grid;place-items:center;background:#2a1d07;color:#f3d58a;font-size:34px;font-weight:800}
 .spark{position:absolute;font-style:normal;font-size:12px;color:#fff1c1;opacity:.0;pointer-events:none;text-shadow:0 0 8px #f3d58a}
 .hof-hero .x-gold{background:linear-gradient(180deg,#e9c26a 0%,#b8862b 45%,#7a5418 55%,#c9993c 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -592,6 +599,14 @@ function mPhoto(m){ return m.photo||yt(m).photo||''; }
 function isLive(m){ return !!(m.live||yt(m).live); }
 function liveUrlOf(m){ return yt(m).liveUrl||safeUrl(m.liveUrl)||safeUrl(m.channelUrl)||safeUrl(m.soopUrl); }
 function fmtSubs(n){ if(n==null||isNaN(n)) return ''; n=Number(n); if(n>=10000) return (n/10000).toFixed(n>=100000?0:1).replace(/\.0$/,'')+'만명'; if(n>=1000) return (n/1000).toFixed(1).replace(/\.0$/,'')+'천명'; return n+'명'; }
+const PICON={
+ '유튜브':'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="1.5" y="5" width="21" height="14" rx="4" fill="#FF0000"/><path d="M10 9l5.2 3L10 15z" fill="#fff"/></svg>',
+ 'SOOP':'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="1" width="22" height="22" rx="6" fill="#0545b1"/><text x="12" y="15.2" text-anchor="middle" font-size="7.4" font-weight="800" font-family="Arial,sans-serif" fill="#fff" letter-spacing=".2">SOOP</text></svg>',
+ '인스타':'<svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="igG" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#feda75"/><stop offset=".35" stop-color="#fa7e1e"/><stop offset=".6" stop-color="#d62976"/><stop offset="1" stop-color="#4f5bd5"/></linearGradient></defs><rect x="1" y="1" width="22" height="22" rx="6.5" fill="url(#igG)"/><rect x="6" y="6" width="12" height="12" rx="3.8" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="2.9" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="16.3" cy="7.7" r="1" fill="#fff"/></svg>',
+ 'SNS':'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="1" width="22" height="22" rx="6.5" fill="#2a2318"/><path d="M10.2 13.8l3.6-3.6M9 11.4l-1.4 1.4a2.6 2.6 0 003.6 3.6l1.4-1.4M15 12.6l1.4-1.4a2.6 2.6 0 00-3.6-3.6L11.4 9" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/></svg>'
+};
+function memberLinks(m){ return [['유튜브',m.channelUrl],['SOOP',m.soopUrl],['인스타',m.instaUrl],['SNS',m.snsUrl]].map(([n,u])=>[n,safeUrl(u)]).filter(x=>x[1]); }
+const PNAME={'유튜브':'유튜브','SOOP':'SOOP','인스타':'인스타그램','SNS':'SNS'};
 function label(id){ return S.labels.find(l=>l.id===id); }
 function lc(id){ const l=label(id); return l?.color || '#c9a45c'; }
 function initial(name){ return esc(String(name||'?').trim().charAt(0)||'?'); }
@@ -757,12 +772,12 @@ function viewHome(){
 
 /* 2. members */
 function memberCard(m){
-  const links=[['유튜브',m.channelUrl],['SOOP',m.soopUrl],['인스타',m.instaUrl],['SNS',m.snsUrl]].map(([n,u])=>[n,safeUrl(u)]).filter(x=>x[1]);
+  const links=memberLinks(m);
   return `<div class="member" id="m-${esc(m.id)}" style="--lc:${esc(lc(m.labelId))}">
     <button class="portrait" data-act="openMember" data-id="${esc(m.id)}" aria-label="${esc(m.name)} 프로필 보기" style="padding:0;cursor:pointer">${mPhoto(m)?`<img src="${blob(mPhoto(m))}" alt="" onerror="this.remove()">`:initial(m.name)}</button>
     ${isLive(m)?`<span class="badge-live">LIVE</span>`:''}${m.role?`<div class="rl">${esc(m.role)}</div>`:''}
     <button class="nm" data-act="openMember" data-id="${esc(m.id)}" style="background:none;border:0;padding:0;cursor:pointer">${esc(m.name)}</button>${yt(m).subs!=null?`<div class="subs">구독자 ${fmtSubs(yt(m).subs)}</div>`:''}
-    <div class="links">${links.map(([n,u])=>`<a href="${esc(u)}" target="_blank" rel="noopener">${n}</a>`).join('')}</div>
+    <div class="links">${links.map(([n,u])=>`<a class="plink" href="${esc(u)}" target="_blank" rel="noopener" aria-label="${PNAME[n]} 바로가기" title="${PNAME[n]}">${PICON[n]}</a>`).join('')}</div>
     ${S.admin?`<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">${adminBtn('toggleLive',m.live?'LIVE 끄기':'LIVE 켜기',`data-id="${esc(m.id)}"`)}${adminBtn('editMember','수정',`data-id="${esc(m.id)}"`)}</div>`:''}
   </div>`;
 }
@@ -781,7 +796,7 @@ function memberMarquee(){
 function memberPopup(id){
   const m=S.members.find(x=>x.id===id); if(!m) return;
   const l=label(m.labelId);
-  const links=[['유튜브',m.channelUrl],['SOOP',m.soopUrl],['인스타그램',m.instaUrl],['SNS',m.snsUrl]].map(([n,u])=>[n,safeUrl(u)]).filter(x=>x[1]);
+  const links=memberLinks(m);
   modalState={fields:[],data:{},images:{}};
   modalRoot.innerHTML=`<div class="modal-bg" data-act="closeBg"><div class="modal mp" role="dialog" aria-modal="true" aria-label="${esc(m.name)}" style="--lc:${esc(lc(m.labelId))}">
     <button class="mp-x" data-act="closeModal" aria-label="닫기">✕</button>
@@ -789,21 +804,21 @@ function memberPopup(id){
     <div class="mp-tags">${l?`<span class="lbadge" style="--lc:${esc(l.color)};color:#fff">${esc(l.name)}</span>`:''}${m.role?`<span class="tag">${esc(m.role)}</span>`:''}${isLive(m)?'<span class="badge-live">LIVE</span>':''}</div>
     <div class="mp-name">${esc(m.name)}</div>${yt(m).subs!=null?`<div class="subs" style="margin-top:-6px">유튜브 구독자 ${fmtSubs(yt(m).subs)}</div>`:''}
     ${yt(m).live?`<a class="btn gold" href="${esc(yt(m).liveUrl)}" target="_blank" rel="noopener" style="width:100%;justify-content:center;background:var(--live);border-color:var(--live)">● 지금 방송 보러가기</a>`:''}
-    ${links.length?`<div class="mp-links">${links.map(([n,u])=>`<a class="btn ${n==='SOOP'||n==='유튜브'?'gold':''}" href="${esc(u)}" target="_blank" rel="noopener">${n} 바로가기 ↗</a>`).join('')}</div>`:`<p class="lead" style="margin:0;text-align:center">등록된 방송 링크가 없어요.</p>`}
+    ${links.length?`<div class="mp-links">${links.map(([n,u])=>`<a class="btn plink-btn" href="${esc(u)}" target="_blank" rel="noopener"><span class="plink-i">${PICON[n]}</span>${PNAME[n]} 바로가기 ↗</a>`).join('')}</div>`:`<p class="lead" style="margin:0;text-align:center">등록된 방송 링크가 없어요.</p>`}
     ${S.admin?`<div style="display:flex;gap:6px;justify-content:center">${adminBtn('toggleLive',m.live?'LIVE 끄기':'LIVE 켜기',`data-id="${esc(m.id)}"`)}${adminBtn('editMember','수정',`data-id="${esc(m.id)}"`)}</div>`:''}
   </div></div>`;
 }
 function viewMember(){
   const m=S.members.find(x=>x.id===S.memberId); if(!m) return viewMembers();
   const l=label(m.labelId); const ph=m.mqPhoto||m.photo;
-  const links=[['유튜브',m.channelUrl],['SOOP',m.soopUrl],['인스타그램',m.instaUrl],['SNS',m.snsUrl]].map(([n,u])=>[n,safeUrl(u)]).filter(x=>x[1]);
+  const links=memberLinks(m);
   return `<button class="btn ghost sm" data-go="members" style="margin-bottom:22px">← 멤버 목록</button>
     <div class="md" style="--lc:${esc(lc(m.labelId))}">
       <div class="md-photo">${ph?`<img src="${blob(ph)}" alt="${esc(m.name)}" onerror="this.remove()">`:`<span class="mq-init">${initial(m.name)}</span>`}</div>
       <div class="md-info">
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${l?`<span class="lbadge" style="--lc:${esc(l.color)};color:#fff">${esc(l.name)}</span>`:''}${m.role?`<span class="tag" style="--lc:${esc(lc(m.labelId))}">${esc(m.role)}</span>`:''}${m.live?'<span class="badge-live">LIVE</span>':''}</div>
         <div class="md-name">${esc(m.name)}</div>
-        ${links.length?`<div class="md-links">${links.map(([n,u],i)=>`<a class="btn ${i?'':'gold'}" href="${esc(u)}" target="_blank" rel="noopener">${n} ↗</a>`).join('')}</div>`:`<p class="lead">아직 등록된 채널 링크가 없어요.</p>`}
+        ${links.length?`<div class="md-links">${links.map(([n,u])=>`<a class="btn plink-btn" href="${esc(u)}" target="_blank" rel="noopener"><span class="plink-i">${PICON[n]}</span>${PNAME[n]} ↗</a>`).join('')}</div>`:`<p class="lead">아직 등록된 채널 링크가 없어요.</p>`}
         ${l?`<button class="btn ghost" data-act="openLabel" data-id="${esc(l.id)}" style="align-self:flex-start;margin-top:10px">${esc(l.name)} 레이블 보기 →</button>`:''}
         ${S.admin?`<div style="display:flex;gap:6px;margin-top:6px">${adminBtn('toggleLive',m.live?'LIVE 끄기':'LIVE 켜기',`data-id="${esc(m.id)}"`)}${adminBtn('editMember','수정',`data-id="${esc(m.id)}"`)}</div>`:''}
       </div>
