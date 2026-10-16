@@ -697,7 +697,7 @@ function viewLabels(){
     </article>`;
   }).join('');
   return `${offlineNote()}
-    <div class="page-head"><div><div class="eyebrow">Labels</div><h1>레이블</h1><p class="lead">레이블을 골라 멤버와 시즌 기록을 확인하세요.</p>${loadingNote()}</div>${adminBtn('newLabel','+ 레이블 추가')}</div>
+    <div class="page-head"><div><div class="eyebrow">Labels</div><h1>레이블</h1><p class="lead">오호컴퍼니가 기획한 레이블을 직접 확인해보세요.</p>${loadingNote()}</div>${adminBtn('newLabel','+ 레이블 추가')}</div>
     ${S.labels.length?`<div class="label-grid">${cards}</div>`:`<div class="empty"><b>등록된 레이블이 없어요</b>${S.admin?'오른쪽 위 “레이블 추가”로 첫 레이블을 등록하세요.':'곧 레이블이 공개될 예정이에요.'}</div>`}`;
 }
 function viewLabel(){
@@ -942,11 +942,11 @@ function viewSchedule(){
   }
   const dayEvents=S.events.filter(e=>e.date===sel).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
   const monthEvents=S.events.filter(e=>e.date.startsWith(`${y}-${pad(mo+1)}`)).sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||'')));
-  return `${offlineNote()}<div class="page-head"><div><div class="eyebrow">Schedule</div><h1>스케줄</h1><p class="lead">날짜를 누르면 그날 방송 일정이 아래에 나와요.</p>${loadingNote()}</div>${adminBtn('newEvent','+ 일정 추가',`data-date="${t}"`)}</div>
+  return `${offlineNote()}<div class="page-head"><div><div class="eyebrow">Schedule</div><h1>스케줄</h1><p class="lead">레이블별 주요 일정을 확인하실 수 있습니다.</p>${loadingNote()}</div>${adminBtn('newEvent','+ 일정 추가',`data-date="${t}"`)}</div>
     <div class="cal-bar"><div class="cal-month">${y}.${pad(mo+1)}<small>${monthEvents.length}개 일정</small></div>
       <div style="display:flex;gap:6px"><button class="btn sm" data-act="month" data-d="-1" aria-label="이전 달">‹ 이전</button><button class="btn sm" data-act="month" data-d="0">오늘</button><button class="btn sm" data-act="month" data-d="1" aria-label="다음 달">다음 ›</button></div></div>
     <div class="cal-wrap"><div class="cal">${cells}</div></div>
-    <div class="legend">${S.labels.map(l=>`<span style="--lc:${esc(l.color)}"><i></i>${esc(l.name)}</span>`).join('')}<span style="--lc:#c9a45c"><i></i>오호컴퍼니 공통</span></div>
+    <div class="legend">${S.labels.map(l=>`<span style="--lc:${esc(l.color)}"><i></i>${esc(l.name)}</span>`).join('')}<span style="--lc:#c9a45c"><i></i>오호컴퍼니</span></div>
     <section class="day-list">
       <div class="day-head"><h2>${esc(fmtDate(sel))}${sel===t?' <span class="tag" style="--lc:var(--gold)">오늘</span>':''}</h2>${adminBtn('newEvent','+ 이 날 일정 추가',`data-date="${sel}"`)}</div>
       ${dayEvents.length?`<div class="ev-list" style="margin-top:0">${dayEvents.map(eventRow).join('')}</div>`:`<div class="empty">이 날은 등록된 방송 일정이 없어요.${S.admin?' 위 버튼으로 추가할 수 있어요.':''}</div>`}
@@ -1167,7 +1167,7 @@ function eventForm(e,date){
     fields:[
       {k:'date',label:'날짜',type:'date',req:1},
       {k:'time',label:'시작 시간',type:'time'},
-      {k:'labelId',label:'레이블',type:'select',options:labelOptions('오호컴퍼니 공통')},
+      {k:'labelId',label:'레이블',type:'select',options:labelOptions('오호컴퍼니')},
       {k:'title',label:'일정 제목',req:1,ph:'예: 시즌2 3회차 방송'},
       {k:'memo',label:'메모',ph:'예: 직급전, 게스트 출연'},
       {k:'link',label:'방송 링크',type:'url',ph:'https://'}],
