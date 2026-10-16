@@ -67,9 +67,29 @@ async function recentVideoIds(channelId, n = 5) {
   } catch { return []; }
 }
 
-// 레이블 공식 채널은 쇼츠·영상이 많아 방송이 최근 5개 밖으로 밀릴 수 있어 15개까지 확인
+// 채널의 /live 페이지를 직접 열어 지금 방송 중인 영상 ID를 찾음 (유튜브 API 사용량 0)
+// 찾은 ID는 아래 videos API로 한 번 더 '방송 중'인지 확인하므로 잘못 뜰 일은 없음
+async function liveVideoIdFromPage(channelId) {
+  try {
+    const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), 6000);
+    const r = await fetch(`https://www.youtube.com/channel/${channelId}/live`, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36', 'Accept-Language': 'ko-KR,ko;q=0.9' },
+      signal: ctrl.signal,
+    }).finally(() => clearTimeout(t));
+    if (!r.ok) return null;
+    const html = await r.text();
+    const m = html.match(/<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([\w-]{11})"/);
+    return m && /"isLive(?:Now)?":true/.test(html) ? m[1] : null;
+  } catch { return null; }
+}
+
+// 레이블 공식 채널은 쇼츠·영상이 많아 방송이 최근 5개 밖으로 밀릴 수 있어 15개까지 확인 + /live 페이지도 확인
 async function refreshLive(channelIds, deepIds = new Set()) {
-  const lists = await Promise.all(channelIds.map(async id => [id, await recentVideoIds(id, deepIds.has(id) ? 15 : 5)]));
+  const lists = await Promise.all(channelIds.map(async id => {
+    const vids = await recentVideoIds(id, deepIds.has(id) ? 15 : 5);
+    if (deepIds.has(id)) { const lv = await liveVideoIdFromPage(id); if (lv && !vids.includes(lv)) vids.unshift(lv); }
+    return [id, vids];
+  }));
   const vidToCh = {};
   for (const [ch, vids] of lists) for (const v of vids) vidToCh[v] = ch;
   const vids = Object.keys(vidToCh), live = {};
