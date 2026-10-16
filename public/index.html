@@ -183,16 +183,9 @@ h3{font-size:18px}
 .live-item .li-t{min-width:0;display:flex;flex-direction:column;gap:2px}
 .live-item .li-t b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .live-item .li-t span{font-size:12px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.live-item.pl-youtube{border-color:#ff4d4d;box-shadow:inset 4px 0 0 #FF0000}
-.live-item.pl-soop{border-color:#3b6fd8;box-shadow:inset 4px 0 0 #0545b1}
 .li-av{position:relative;flex:none;display:block}
 .li-pbadge{position:absolute;right:-4px;bottom:-4px;width:22px;height:22px;border-radius:6px;background:#fff;padding:2px;box-shadow:0 1px 4px rgba(0,0,0,.25)}
-.li-pbadge svg,.li-pbadge img,.li-plat-i svg,.li-plat-i img{display:block;width:100%;height:100%}
-.li-plat{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:2px 9px 2px 4px;border-radius:999px;background:#fff;white-space:nowrap}
-.li-plat-i{width:18px;height:18px;flex:none}
-.li-plat-youtube{color:#d40000;border:1px solid #ffb3b3}
-.li-plat-soop{color:#0545b1;border:1px solid #a9c1f0}
-.ol-info .li-plat{margin-left:auto}
+.li-pbadge svg,.li-pbadge img{display:block;width:100%;height:100%}
 .plat-tag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.04em;color:#fff;padding:1px 7px;border-radius:3px;align-self:center;white-space:nowrap}.plat-yt{background:#FF0000}.plat-soop{background:#0545b1}
 .badge-live{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.1em;color:#fff;background:var(--live);padding:1px 7px;border-radius:3px;align-self:center}
 .live-empty{color:var(--mute);font-size:14px}
@@ -749,7 +742,7 @@ function officialLiveCards(f){
   if(!list.length) return '';
   return `<div class="ol-row">${list.map(({l,v})=>`<a class="ol-card" href="${esc(v.liveUrl)}" target="_blank" rel="noopener" style="--lc:${esc(l.color)}">
     <span class="ol-thumb">${v.thumb?`<img src="${esc(v.thumb)}" alt="" onerror="this.remove()">`:''}<span class="badge-live ol-badge">LIVE</span><span class="ol-play" aria-hidden="true">▶</span></span>
-    <span class="ol-info">${seal(l,'sm')}<span class="ol-t"><small>${esc(l.name)} 공식 채널</small><b>${esc(v.liveTitle||'지금 방송 중')}</b></span><span class="li-plat li-plat-youtube"><span class="li-plat-i">${PICON['유튜브']}</span>유튜브</span><span class="ol-go">방송 보러가기 ↗</span></span>
+    <span class="ol-info">${seal(l,'sm')}<span class="ol-t"><small>${esc(l.name)} 공식 채널</small><b>${esc(v.liveTitle||'지금 방송 중')}</b></span><span class="ol-go">방송 보러가기 ↗</span></span>
   </a>`).join('')}</div>`;
 }
 function viewLive(){
@@ -760,10 +753,9 @@ function viewLive(){
     ${S.labels.map(l=>`<button class="chip" style="--lc:${esc(l.color)}" data-act="liveFilter" data-id="${esc(l.id)}" aria-pressed="${f===l.id}"><span class="dot"></span>${esc(l.name)} <b>${all.filter(x=>x.labelId===l.id).length+offl.filter(x=>x.l.id===l.id).length}</b></button>`).join('')}
   </div>`;
   const rows=shown.map(x=>{ const pk=x.plat==='soop'?'SOOP':x.plat==='youtube'?'유튜브':'';
-    const media=pk?`<span class="li-av">${x.media}<span class="li-pbadge">${PICON[pk]}</span></span>`:x.media;
-    const inner=`${media}<span class="li-t"><b>${esc(x.name)}</b><span>${esc(x.sub)}</span></span><span style="margin-left:auto;display:flex;flex-direction:column;gap:4px;align-items:flex-end">${pk?`<span class="li-plat li-plat-${x.plat}"><span class="li-plat-i">${PICON[pk]}</span>${pk==='SOOP'?'SOOP':'유튜브'}</span>`:''}<span class="badge-live">${x.badge}</span></span>${x.url?`<span class="li-go">보러가기 ↗</span>`:''}`;
-    const cls=`live-item${x.plat?' pl-'+x.plat:''}`;
-    return x.url?`<a class="${cls}" href="${esc(x.url)}" target="_blank" rel="noopener">${inner}</a>`:`<div class="${cls}">${inner}</div>`; }).join('');
+    const media=pk?`<span class="li-av">${x.media}<span class="li-pbadge" title="${pk} 방송">${PICON[pk]}</span></span>`:x.media;
+    const inner=`${media}<span class="li-t"><b>${esc(x.name)}</b><span>${esc(x.sub)}</span></span><span style="margin-left:auto;display:flex;gap:4px;align-items:center"><span class="badge-live">${x.badge}</span></span>${x.url?`<span class="li-go">보러가기 ↗</span>`:''}`;
+    return x.url?`<a class="live-item" href="${esc(x.url)}" target="_blank" rel="noopener">${inner}</a>`:`<div class="live-item">${inner}</div>`; }).join('');
   return `<section class="live" id="liveNow" aria-label="현재 방송중인 멤버">
     <h2 class="x-title x-row" style="letter-spacing:-.04em;font-size:clamp(30px,5vw,56px)"><span>현재 방송 중인</span><span class="x-gold">채널</span></h2>
     <p class="x-sub"><span class="live-dot ${all.length+offl.length?'':'off'}"></span>${all.length+offl.length?`현재 방송 중인 채널은 <b>${all.length+offl.length}</b>개입니다.`:'지금은 방송 중인 채널이 없어요.'}</p>
