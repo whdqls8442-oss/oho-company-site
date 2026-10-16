@@ -381,6 +381,14 @@ h3{font-size:18px}
 .cat.notice{border-color:var(--gold);color:var(--gold-hi)}
 .post-view{max-width:760px}
 .post-view .meta{color:var(--faint);font-size:13px;margin:10px 0 28px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.post-imgs{display:flex;flex-direction:column;gap:14px;margin-top:24px}
+.post-imgs img{display:block;width:100%;height:auto;border-radius:8px;border:1px solid var(--line-soft)}
+.has-img{font-size:13px;opacity:.7}
+.imgs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+.imgs-it{position:relative;width:72px;height:72px;border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+.imgs-it img{width:100%;height:100%;object-fit:cover}
+.imgs-it button{position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:11px;line-height:20px;padding:0;cursor:pointer}
+.imgs-empty{font-size:12.5px;color:var(--faint)}
 .post-view .body{white-space:pre-wrap;overflow-wrap:anywhere;font-size:15.5px;line-height:1.85;border-top:1px solid var(--line-soft);padding-top:24px}
 
 /* apply */
@@ -983,7 +991,7 @@ function sortedPosts(){ return [...S.posts].sort((a,b)=>(b.pinned?1:0)-(a.pinned
 function viewBoard(){
   const rows=sortedPosts().map(p=>`<button class="post-row ${p.pinned?'pinned':''}" data-act="openPost" data-id="${esc(p.id)}">
       <span class="cat ${p.category==='공지'?'notice':''}">${p.pinned?'📌 ':''}${esc(p.category||'일반')}</span>
-      <span class="pt">${esc(p.title)}</span>
+      <span class="pt">${esc(p.title)}${(p.images||[]).length?' <span class="has-img" title="이미지 첨부">🖼</span>':''}</span>
       <span class="pd">${esc(fmtTs(p.createdAt))}</span></button>`).join('');
   return `${offlineNote()}<div class="page-head"><div><div class="eyebrow">Notice Board</div><h1>게시판</h1><p class="lead">오호컴퍼니와 각 레이블의 공지·이벤트 소식이에요.</p>${loadingNote()}</div>${adminBtn('newPost','+ 글쓰기')}</div>
     ${S.posts.length?`<div class="board">${rows}</div>`:`<div class="empty"><b>아직 게시글이 없어요</b>${S.admin?'“글쓰기”로 첫 공지를 올려보세요.':'새 공지가 올라오면 이곳에 표시돼요.'}</div>`}`;
@@ -994,7 +1002,8 @@ function viewPost(){
     <article class="post-view"><span class="cat ${p.category==='공지'?'notice':''}">${esc(p.category||'일반')}</span>
       <h1 style="margin-top:12px">${esc(p.title)}</h1>
       <div class="meta"><span>${esc(fmtTs(p.createdAt))}</span>${p.labelId&&label(p.labelId)?`<span class="tag" style="--lc:${esc(lc(p.labelId))}">${esc(label(p.labelId).name)}</span>`:''}${adminBtn('editPost','수정',`data-id="${esc(p.id)}"`)}</div>
-      <div class="body">${esc(p.body)}</div></article>`;
+      <div class="body">${esc(p.body)}</div>
+      ${(p.images||[]).length?`<div class="post-imgs">${p.images.map(id=>`<a href="${esc(blob(id))}" target="_blank" rel="noopener"><img src="${esc(blob(id))}" alt="" loading="lazy" onerror="this.parentNode.remove()"></a>`).join('')}</div>`:''}</article>`;
 }
 
 /* 6. apply */
@@ -1070,6 +1079,12 @@ function openForm({title,fields,data={},onSave,onDelete}){
     else if(f.type==='select') input=`<select id="${id}">${f.options.map(o=>`<option value="${esc(o.v)}" ${String(o.v)===String(v)?'selected':''}>${esc(o.t)}</option>`).join('')}</select>`;
     else if(f.type==='checkbox') return `<label class="agree"><input type="checkbox" id="${id}" ${v?'checked':''}><span>${esc(f.label)}</span></label>`;
     else if(f.type==='color') input=`<input type="color" id="${id}" value="${esc(v||'#c9a45c')}">`;
+    else if(f.type==='images'){
+      if(!S.assets) return '';
+      modalState.images[f.k]=Array.isArray(v)?[...v]:[];
+      return `<div class="field"><span class="lbl">${esc(f.label)}</span><div class="imgs" id="${id}_list">${imgsHtml(f.k)}</div>
+        <input type="file" id="${id}" multiple accept="image/png,image/jpeg,image/webp,image/gif" data-imgs="${f.k}"><span class="msg ok" id="${id}_st"></span></div>`;
+    }
     else if(f.type==='image'){
       if(!S.assets) return '';
       modalState.images[f.k]=v||null;
@@ -1086,12 +1101,14 @@ function openForm({title,fields,data={},onSave,onDelete}){
   </form></div>`;
   const firstInput=modalRoot.querySelector('input,textarea,select'); firstInput&&firstInput.focus();
 }
+function imgsHtml(k){ const a=(modalState&&modalState.images[k])||[]; return a.length?a.map((id,i)=>`<span class="imgs-it"><img src="${blob(id)}" alt=""><button type="button" data-act="rmImg" data-k="${k}" data-i="${i}" aria-label="이미지 빼기">✕</button></span>`).join(''):'<span class="imgs-empty">첨부한 이미지가 없어요</span>'; }
 function closeModal(){ modalRoot.innerHTML=''; modalState=null; }
 function collectModal(){
   const out={...modalState.data}; delete out.id;
   for(const f of modalState.fields){
     const el=document.getElementById('mf_'+f.k);
     if(f.type==='image'){ if(S.assets) out[f.k]=modalState.images[f.k]||null; continue; }
+    if(f.type==='images'){ if(S.assets) out[f.k]=modalState.images[f.k]||[]; continue; }
     if(!el) continue;
     if(f.type==='checkbox') out[f.k]=el.checked;
     else if(f.type==='number') out[f.k]=el.value===''?null:Number(el.value);
@@ -1176,6 +1193,7 @@ function postForm(p){
       {k:'labelId',label:'관련 레이블',type:'select',options:labelOptions('전체')},
       {k:'title',label:'제목',req:1},
       {k:'body',label:'내용',type:'textarea',req:1},
+      {k:'images',label:'이미지 첨부 (여러 장 가능)',type:'images'},
       {k:'pinned',label:'목록 맨 위에 고정',type:'checkbox'}],
     onSave:d=>{ if(!p) d.createdAt=Date.now(); else d.updatedAt=Date.now(); return saveDoc('posts',p?.id,d); },
     onDelete:p?()=>S.db.doc('posts/'+p.id).delete().then(()=>{S.postId=null;}):null});
@@ -1225,6 +1243,7 @@ document.addEventListener('click', async ev=>{
     case 'openPost': go('board',{postId:id}); break;
     case 'reapply': S.applyDone=false; render(); break;
     case 'closeModal': closeModal(); break;
+    case 'rmImg': { const k=t.dataset.k; modalState.images[k].splice(+t.dataset.i,1); document.getElementById('mf_'+k+'_list').innerHTML=imgsHtml(k); break; }
     case 'clearImg': { const k=t.dataset.k; modalState.images[k]=null; document.getElementById('mf_'+k+'_pv').innerHTML='없음'; t.remove(); break; }
     case 'askDelete': document.getElementById('delZone').innerHTML=`<span style="font-size:13px;color:var(--bad);margin-right:8px">되돌릴 수 없어요.</span><button type="button" class="btn danger" data-act="doDelete">삭제 확정</button>`; break;
     case 'doDelete': { const msg=document.getElementById('modalMsg'); try{ await modalState.onDelete(); closeModal(); render(); }catch(e){ msg.textContent=errText(e); } break; }
@@ -1236,6 +1255,17 @@ document.addEventListener('keydown',ev=>{
 });
 document.addEventListener('change', async ev=>{
   const t=ev.target;
+  if(t.dataset.imgs && t.files?.length){
+    const k=t.dataset.imgs, st=document.getElementById(t.id+'_st'), files=[...t.files].slice(0,10);
+    const save=document.getElementById('modalSave'); save.disabled=true; st.className='msg ok';
+    for(let i=0;i<files.length;i++){
+      st.textContent=`올리는 중… (${i+1}/${files.length})`;
+      try{ const r=await S.assets.upload(files[i]); modalState.images[k].push(r.id); document.getElementById('mf_'+k+'_list').innerHTML=imgsHtml(k); }
+      catch(e){ st.className='msg'; st.textContent=(e&&e.message)||'이미지를 올리지 못했어요.'; }
+    }
+    if(st.className==='msg ok') st.textContent='올렸어요. 저장을 눌러 반영하세요.';
+    t.value=''; save.disabled=false; return;
+  }
   if(t.dataset.img && t.files?.[0]){
     const k=t.dataset.img, st=document.getElementById(t.id+'_st'), f=t.files[0];
     if(f.size>30*1024*1024){ st.className='msg'; st.textContent='30MB 이하 이미지만 올릴 수 있어요.'; return; }
