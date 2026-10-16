@@ -123,17 +123,23 @@ async function soopPage(page) {
   if (!r.ok) throw new Error('SOOP ' + r.status);
   return r.json();
 }
+let soopStat = {};
 async function refreshSoop(ids) {
   const want = new Set(ids), found = {};
+  soopStat = { enabled: !!SOOP_ID, watching: want.size };
   if (!SOOP_ID || !want.size) return found;
   const take = (j) => { for (const b of (j && j.broad) || []) { const id = String(b.user_id || '').toLowerCase(); if (want.has(id) && !found[id]) found[id] = { broadNo: b.broad_no, title: b.broad_title || '', thumb: b.broad_thumb ? 'https:' + String(b.broad_thumb).replace(/^https?:/, '') : '' }; } };
-  const first = await soopPage(1); take(first);
+  const first = await soopPage(1);
+  if (!first || !Array.isArray(first.broad)) throw new Error('SOOP 응답 오류: ' + JSON.stringify(first).slice(0, 150));
+  take(first);
   const per = Number(first.page_block) || 60, pages = Math.min(Math.ceil((Number(first.total_cnt) || 0) / per), 300);
+  soopStat.total = Number(first.total_cnt) || 0; soopStat.pages = pages;
   for (let p = 2; p <= pages && Object.keys(found).length < want.size; p += 8) {
     const batch = [];
     for (let q = p; q < p + 8 && q <= pages; q++) batch.push(soopPage(q).then(take).catch(() => {}));
     await Promise.all(batch);
   }
+  soopStat.found = Object.keys(found).length;
   return found;
 }
 
@@ -161,9 +167,9 @@ module.exports = async (req, res) => {
             const soopIds = [...new Set(members.map(([, m]) => m.soopUrl && parseSoop(m.soopUrl)).filter(Boolean))];
             const [live, soop] = await Promise.all([
               refreshLive(ids, new Set(labels.map(([, l]) => ch[l.ytUrl] && ch[l.ytUrl].id).filter(Boolean))),
-              refreshSoop(soopIds).catch(() => (liveCache.soop || {})),
+              refreshSoop(soopIds).catch((e) => { soopStat.err = String(e.message || e); return liveCache.soop || {}; }),
             ]);
-            liveCache = { at: Date.now(), live, soop };
+            liveCache = { at: Date.now(), live, soop, soopStat };
             await setJSON(LIVE_KEY, liveCache);
           }
         } finally { await redis(['DEL', LOCK_KEY]).catch(() => {}); }
@@ -191,6 +197,6 @@ module.exports = async (req, res) => {
       const lv = c.id && liveCache.live[c.id];
       labelOut[id] = { photo: c.photo || '', subs: c.subs ?? null, live: !!lv, liveUrl: lv ? `https://www.youtube.com/watch?v=${lv.videoId}` : '', liveTitle: lv ? lv.title : '', thumb: lv ? lv.thumb : '' };
     }
-    send(res, 200, { members: out, labels: labelOut, checkedAt: liveCache.at }, { 'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60' });
+    send(res, 200, { members: out, labels: labelOut, checkedAt: liveCache.at, soop: liveCache.soopStat || null }, { 'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60' });
   } catch (e) { send(res, 200, { members: {}, error: String(e.message || e) }); }
 };
