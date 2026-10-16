@@ -183,6 +183,7 @@ h3{font-size:18px}
 .live-item .li-t{min-width:0;display:flex;flex-direction:column;gap:2px}
 .live-item .li-t b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .live-item .li-t span{font-size:12px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.plat-tag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.04em;color:#fff;padding:1px 7px;border-radius:3px;align-self:center;white-space:nowrap}.plat-yt{background:#FF0000}.plat-soop{background:#0545b1}
 .badge-live{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.1em;color:#fff;background:var(--live);padding:1px 7px;border-radius:3px;align-self:center}
 .live-empty{color:var(--mute);font-size:14px}
 /* label detail */
@@ -632,7 +633,11 @@ function blob(id){ if(!id) return ''; return /^(https?:|\/)/.test(id)?id:'/media
 function yt(m){ return (S.yt&&S.yt[m.id])||{}; }
 function mPhoto(m){ return m.photo||yt(m).photo||''; }
 function isLive(m){ return !!(m.live||yt(m).live); }
-function liveUrlOf(m){ return yt(m).liveUrl||safeUrl(m.liveUrl)||safeUrl(m.channelUrl)||safeUrl(m.soopUrl); }
+function liveUrlOf(m){ if(yt(m).live) return yt(m).liveUrl; if(m.live&&!safeUrl(m.liveUrl)&&safeUrl(m.soopUrl)) return safeUrl(m.soopUrl); return yt(m).liveUrl||safeUrl(m.liveUrl)||safeUrl(m.channelUrl)||safeUrl(m.soopUrl); }
+// 방송 플랫폼 구분: 자동 감지(유튜브 우선) → 수동 LIVE는 연결 주소로 판단
+function livePlat(m){ const y=yt(m); if(y.live) return y.livePlatform==='soop'?'soop':'youtube'; if(!m.live) return ''; const u=liveUrlOf(m); return /sooplive|afreecatv/i.test(u)?'soop':/youtube\.com|youtu\.be/i.test(u)?'youtube':''; }
+const PLAT={youtube:['유튜브','plat-yt'],soop:['SOOP','plat-soop']};
+function platTag(p,suffix){ return PLAT[p]?`<span class="plat-tag ${PLAT[p][1]}">${PLAT[p][0]}${suffix||''}</span>`:''; }
 function fmtSubs(n){ if(n==null||isNaN(n)) return ''; n=Number(n); if(n>=10000) return (n/10000).toFixed(n>=100000?0:1).replace(/\.0$/,'')+'만명'; if(n>=1000) return (n/1000).toFixed(1).replace(/\.0$/,'')+'천명'; return n+'명'; }
 const PICON={
  '유튜브':'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="1.5" y="5" width="21" height="14" rx="4" fill="#FF0000"/><path d="M10 9l5.2 3L10 15z" fill="#fff"/></svg>',
@@ -725,7 +730,7 @@ function onAirEvents(){
 function liveItems(){
   const out=[];
   onAirEvents().forEach(e=>{ const l=label(e.labelId); out.push({labelId:e.labelId, url:safeUrl(e.link)||safeUrl(l?.siteUrl), media:l?seal(l):'', name:`${l?l.name:'오호컴퍼니'} 단체 방송`, sub:`${e.title} · ${e.time} 시작`, badge:'ON AIR'}); });
-  S.members.filter(isLive).forEach(m=>{ const l=label(m.labelId); out.push({labelId:m.labelId, url:liveUrlOf(m), media:`<span class="portrait" style="--lc:${esc(lc(m.labelId))}">${mPhoto(m)?`<img src="${blob(mPhoto(m))}" alt="" onerror="this.remove()">`:initial(m.name)}</span>`, name:m.name, sub:yt(m).liveTitle||(l?l.name:''), badge:'LIVE'}); });
+  S.members.filter(isLive).forEach(m=>{ const l=label(m.labelId); out.push({labelId:m.labelId, url:liveUrlOf(m), media:`<span class="portrait" style="--lc:${esc(lc(m.labelId))}">${mPhoto(m)?`<img src="${blob(mPhoto(m))}" alt="" onerror="this.remove()">`:initial(m.name)}</span>`, name:m.name, sub:yt(m).liveTitle||(l?l.name:''), badge:'LIVE', plat:livePlat(m)}); });
   return out;
 }
 function officialLives(){ const L=(S.ytLabels||{}); return S.labels.filter(l=>L[l.id]&&L[l.id].live).map(l=>({l,v:L[l.id]})); }
@@ -744,7 +749,7 @@ function viewLive(){
     <button class="chip" data-act="liveFilter" data-id="all" aria-pressed="${f==='all'}">전체 <b>${all.length+offl.length}</b></button>
     ${S.labels.map(l=>`<button class="chip" style="--lc:${esc(l.color)}" data-act="liveFilter" data-id="${esc(l.id)}" aria-pressed="${f===l.id}"><span class="dot"></span>${esc(l.name)} <b>${all.filter(x=>x.labelId===l.id).length+offl.filter(x=>x.l.id===l.id).length}</b></button>`).join('')}
   </div>`;
-  const rows=shown.map(x=>{ const inner=`${x.media}<span class="li-t"><b>${esc(x.name)}</b><span>${esc(x.sub)}</span></span><span class="badge-live" style="margin-left:auto">${x.badge}</span>${x.url?`<span class="li-go">보러가기 ↗</span>`:''}`;
+  const rows=shown.map(x=>{ const inner=`${x.media}<span class="li-t"><b>${esc(x.name)}</b><span>${esc(x.sub)}</span></span><span style="margin-left:auto;display:flex;gap:4px;align-items:center">${platTag(x.plat,' 방송')}<span class="badge-live">${x.badge}</span></span>${x.url?`<span class="li-go">보러가기 ↗</span>`:''}`;
     return x.url?`<a class="live-item" href="${esc(x.url)}" target="_blank" rel="noopener">${inner}</a>`:`<div class="live-item">${inner}</div>`; }).join('');
   return `<section class="live" id="liveNow" aria-label="현재 방송중인 멤버">
     <h2 class="x-title x-row" style="letter-spacing:-.04em;font-size:clamp(30px,5vw,56px)"><span>현재 방송 중인</span><span class="x-gold">채널</span></h2>
@@ -847,7 +852,7 @@ function memberCard(m){
   const links=memberLinks(m);
   return `<div class="member" id="m-${esc(m.id)}" style="--lc:${esc(lc(m.labelId))}">
     <button class="portrait" data-act="openMember" data-id="${esc(m.id)}" aria-label="${esc(m.name)} 프로필 보기" style="padding:0;cursor:pointer">${mPhoto(m)?`<img src="${blob(mPhoto(m))}" alt="" onerror="this.remove()">`:initial(m.name)}</button>
-    ${isLive(m)?`<span class="badge-live">LIVE</span>`:''}${m.role?`<div class="rl">${esc(m.role)}</div>`:''}
+    ${isLive(m)?`<span style="display:flex;gap:4px;justify-content:center">${platTag(livePlat(m))}<span class="badge-live">LIVE</span></span>`:''}${m.role?`<div class="rl">${esc(m.role)}</div>`:''}
     <button class="nm" data-act="openMember" data-id="${esc(m.id)}" style="background:none;border:0;padding:0;cursor:pointer">${esc(m.name)}</button>${yt(m).subs!=null?`<div class="subs">구독자 ${fmtSubs(yt(m).subs)}</div>`:''}
     <div class="links">${links.map(([n,u])=>`<a class="plink" href="${esc(u)}" target="_blank" rel="noopener" aria-label="${PNAME[n]} 바로가기" title="${PNAME[n]}">${PICON[n]}</a>`).join('')}</div>
     ${S.admin?`<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">${adminBtn('toggleLive',m.live?'LIVE 끄기':'LIVE 켜기',`data-id="${esc(m.id)}"`)}${adminBtn('editMember','수정',`data-id="${esc(m.id)}"`)}</div>`:''}
@@ -873,9 +878,9 @@ function memberPopup(id){
   modalRoot.innerHTML=`<div class="modal-bg" data-act="closeBg"><div class="modal mp" role="dialog" aria-modal="true" aria-label="${esc(m.name)}" style="--lc:${esc(lc(m.labelId))}">
     <button class="mp-x" data-act="closeModal" aria-label="닫기">✕</button>
     <div class="portrait mp-ph">${mPhoto(m)?`<img src="${blob(mPhoto(m))}" alt="" onerror="this.remove()">`:initial(m.name)}</div>
-    <div class="mp-tags">${l?`<span class="lbadge" style="--lc:${esc(l.color)};color:#fff">${esc(l.name)}</span>`:''}${m.role?`<span class="tag">${esc(m.role)}</span>`:''}${isLive(m)?'<span class="badge-live">LIVE</span>':''}</div>
+    <div class="mp-tags">${l?`<span class="lbadge" style="--lc:${esc(l.color)};color:#fff">${esc(l.name)}</span>`:''}${m.role?`<span class="tag">${esc(m.role)}</span>`:''}${isLive(m)?platTag(livePlat(m),' 방송')+'<span class="badge-live">LIVE</span>':''}</div>
     <div class="mp-name">${esc(m.name)}</div>${yt(m).subs!=null?`<div class="subs" style="margin-top:-6px">유튜브 구독자 ${fmtSubs(yt(m).subs)}</div>`:''}
-    ${yt(m).live?`<a class="btn gold" href="${esc(yt(m).liveUrl)}" target="_blank" rel="noopener" style="width:100%;justify-content:center;background:var(--live);border-color:var(--live)">● 지금 방송 보러가기</a>`:''}
+    ${isLive(m)&&liveUrlOf(m)?`<a class="btn gold" href="${esc(liveUrlOf(m))}" target="_blank" rel="noopener" style="width:100%;justify-content:center;background:var(--live);border-color:var(--live)">● ${livePlat(m)==='soop'?'SOOP':livePlat(m)==='youtube'?'유튜브':'지금'} 방송 보러가기</a>`:''}
     ${links.length?`<div class="mp-links">${links.map(([n,u])=>`<a class="btn plink-btn" href="${esc(u)}" target="_blank" rel="noopener"><span class="plink-i">${PICON[n]}</span>${PNAME[n]} 바로가기 ↗</a>`).join('')}</div>`:`<p class="lead" style="margin:0;text-align:center">등록된 방송 링크가 없어요.</p>`}
     ${S.admin?`<div style="display:flex;gap:6px;justify-content:center">${adminBtn('toggleLive',m.live?'LIVE 끄기':'LIVE 켜기',`data-id="${esc(m.id)}"`)}${adminBtn('editMember','수정',`data-id="${esc(m.id)}"`)}</div>`:''}
   </div></div>`;
