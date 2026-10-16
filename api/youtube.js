@@ -5,6 +5,7 @@
 const { loadData, getJSON, setJSON, redis, send } = require('./_lib');
 
 const KEY = process.env.YOUTUBE_API_KEY;
+const SOOP_ID = process.env.SOOP_CLIENT_ID;
 const API = 'https://www.googleapis.com/youtube/v3';
 const CH_KEY = 'oho:yt:ch', LIVE_KEY = 'oho:yt:live', LOCK_KEY = 'oho:yt:lock';
 const CH_TTL = 6 * 3600 * 1000, LIVE_TTL = 180 * 1000;
@@ -105,6 +106,37 @@ async function refreshLive(channelIds, deepIds = new Set()) {
   return live;
 }
 
+// ── SOOP: 공식 Open API(broad/list, Public)로 '지금 방송 중인 전체 목록'을 넘겨보며 우리 멤버를 찾음
+// 멤버를 모두 찾으면 바로 멈추고, 못 찾으면 목록 끝까지 확인 (확인 주기는 유튜브와 같은 3분)
+function parseSoop(url) {
+  try {
+    const u = new URL(url);
+    if (!/(^|\.)(sooplive\.co\.kr|sooplive\.com|afreecatv\.com)$/.test(u.hostname)) return null;
+    const seg = u.pathname.split('/').filter(Boolean);
+    const id = seg[0] === 'station' ? seg[1] : seg[0];
+    return id && /^[\w.-]{2,40}$/.test(id) ? id.toLowerCase() : null;
+  } catch { return null; }
+}
+async function soopPage(page) {
+  const qs = new URLSearchParams({ client_id: SOOP_ID, page_no: String(page) });
+  const r = await fetch(`https://openapi.sooplive.com/broad/list?${qs}`, { headers: { Accept: 'application/json' } });
+  if (!r.ok) throw new Error('SOOP ' + r.status);
+  return r.json();
+}
+async function refreshSoop(ids) {
+  const want = new Set(ids), found = {};
+  if (!SOOP_ID || !want.size) return found;
+  const take = (j) => { for (const b of (j && j.broad) || []) { const id = String(b.user_id || '').toLowerCase(); if (want.has(id) && !found[id]) found[id] = { broadNo: b.broad_no, title: b.broad_title || '', thumb: b.broad_thumb ? 'https:' + String(b.broad_thumb).replace(/^https?:/, '') : '' }; } };
+  const first = await soopPage(1); take(first);
+  const per = Number(first.page_block) || 60, pages = Math.min(Math.ceil((Number(first.total_cnt) || 0) / per), 300);
+  for (let p = 2; p <= pages && Object.keys(found).length < want.size; p += 8) {
+    const batch = [];
+    for (let q = p; q < p + 8 && q <= pages; q++) batch.push(soopPage(q).then(take).catch(() => {}));
+    await Promise.all(batch);
+  }
+  return found;
+}
+
 module.exports = async (req, res) => {
   if (!KEY) return send(res, 200, { disabled: true, members: {} });
   try {
@@ -126,7 +158,12 @@ module.exports = async (req, res) => {
           await setJSON(CH_KEY, ch);
           if (Date.now() - liveCache.at > LIVE_TTL) {
             const ids = [...new Set(urls.map(u => ch[u] && ch[u].id).filter(Boolean))];
-            liveCache = { at: Date.now(), live: await refreshLive(ids, new Set(labels.map(([, l]) => ch[l.ytUrl] && ch[l.ytUrl].id).filter(Boolean))) };
+            const soopIds = [...new Set(members.map(([, m]) => m.soopUrl && parseSoop(m.soopUrl)).filter(Boolean))];
+            const [live, soop] = await Promise.all([
+              refreshLive(ids, new Set(labels.map(([, l]) => ch[l.ytUrl] && ch[l.ytUrl].id).filter(Boolean))),
+              refreshSoop(soopIds).catch(() => (liveCache.soop || {})),
+            ]);
+            liveCache = { at: Date.now(), live, soop };
             await setJSON(LIVE_KEY, liveCache);
           }
         } finally { await redis(['DEL', LOCK_KEY]).catch(() => {}); }
@@ -136,9 +173,16 @@ module.exports = async (req, res) => {
     const out = {};
     for (const [id, m] of members) {
       const c = ch[m.channelUrl];
-      if (!c || c.bad) continue;
-      const lv = c.id && liveCache.live[c.id];
-      out[id] = { photo: c.photo || '', subs: c.subs ?? null, live: !!lv, liveUrl: lv ? `https://www.youtube.com/watch?v=${lv.videoId}` : '', liveTitle: lv ? lv.title : '' };
+      const ok = c && !c.bad;
+      const lv = ok && c.id && liveCache.live[c.id];
+      const sid = m.soopUrl && parseSoop(m.soopUrl);
+      const sv = !lv && sid && (liveCache.soop || {})[sid];
+      if (!ok && !sv) continue;
+      out[id] = { photo: ok ? (c.photo || '') : '', subs: ok ? (c.subs ?? null) : null,
+        live: !!(lv || sv),
+        liveUrl: lv ? `https://www.youtube.com/watch?v=${lv.videoId}` : sv ? `https://play.sooplive.co.kr/${sid}/${sv.broadNo}` : '',
+        liveTitle: lv ? lv.title : sv ? sv.title : '',
+        livePlatform: lv ? 'youtube' : sv ? 'soop' : '' };
     }
     const labelOut = {};
     for (const [id, l] of labels) {
