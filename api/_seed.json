@@ -8,14 +8,15 @@
    "name": "블루라벨클럽",
    "order": 1,
    "siteUrl": "https://bluelabel.funn.at/",
-   "tagline": "매주 월·목 정규 방송 · 현재 시즌2 진행 중"
+   "tagline": "매주 월·목 정규 방송 · 현재 시즌2 진행 중",
+   "ytUrl": "https://www.youtube.com/channel/UCpQbfbzI2R1iOb1OGk4yaFA"
   },
   "shoutout": {
    "banner": "/media/8598860b66d326af33292dd5a1e6632e.jpg",
    "color": "#e0571c",
    "en": "SHOUT OUT PROJECT",
    "logo": "/media/aca9bacc2b480392e31b39630baeeced.jpg",
-   "name": "샤라웃",
+   "name": "샤라웃프로젝트",
    "order": 2,
    "siteUrl": "https://shoutoutproject.funn.at/",
    "tagline": "매주 화·금 정규 방송 · 현재 시즌1 진행 중"

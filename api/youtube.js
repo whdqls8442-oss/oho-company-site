@@ -75,7 +75,10 @@ async function refreshLive(channelIds) {
   for (let i = 0; i < vids.length; i += 50) {
     const j = await yt('videos', { part: 'snippet', id: vids.slice(i, i + 50).join(',') });
     for (const v of j.items || []) {
-      if (v.snippet.liveBroadcastContent === 'live') live[vidToCh[v.id]] = { videoId: v.id, title: v.snippet.title };
+      if (v.snippet.liveBroadcastContent === 'live') {
+        const t = v.snippet.thumbnails || {};
+        live[vidToCh[v.id]] = { videoId: v.id, title: v.snippet.title, thumb: (t.maxres || t.standard || t.high || t.medium || {}).url || `https://i.ytimg.com/vi/${v.id}/hqdefault_live.jpg` };
+      }
     }
   }
   return live;
@@ -86,7 +89,8 @@ module.exports = async (req, res) => {
   try {
     const data = await loadData();
     const members = Object.entries(data.members || {});
-    const urls = [...new Set(members.map(([, m]) => m.channelUrl).filter(u => u && /youtube\.com/.test(u)))];
+    const labels = Object.entries(data.labels || {});
+    const urls = [...new Set([...members.map(([, m]) => m.channelUrl), ...labels.map(([, l]) => l.ytUrl)].filter(u => u && /youtube\.com/.test(u)))];
 
     let ch = await getJSON(CH_KEY, {});
     let liveCache = await getJSON(LIVE_KEY, { at: 0, live: {} });
@@ -115,6 +119,13 @@ module.exports = async (req, res) => {
       const lv = c.id && liveCache.live[c.id];
       out[id] = { photo: c.photo || '', subs: c.subs ?? null, live: !!lv, liveUrl: lv ? `https://www.youtube.com/watch?v=${lv.videoId}` : '', liveTitle: lv ? lv.title : '' };
     }
-    send(res, 200, { members: out, checkedAt: liveCache.at }, { 'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60' });
+    const labelOut = {};
+    for (const [id, l] of labels) {
+      const c = ch[l.ytUrl];
+      if (!c || c.bad) continue;
+      const lv = c.id && liveCache.live[c.id];
+      labelOut[id] = { photo: c.photo || '', subs: c.subs ?? null, live: !!lv, liveUrl: lv ? `https://www.youtube.com/watch?v=${lv.videoId}` : '', liveTitle: lv ? lv.title : '', thumb: lv ? lv.thumb : '' };
+    }
+    send(res, 200, { members: out, labels: labelOut, checkedAt: liveCache.at }, { 'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60' });
   } catch (e) { send(res, 200, { members: {}, error: String(e.message || e) }); }
 };
