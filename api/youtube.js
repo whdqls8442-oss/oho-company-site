@@ -58,17 +58,18 @@ async function refreshChannels(urls, cache) {
   return cache;
 }
 
-async function recentVideoIds(channelId) {
+async function recentVideoIds(channelId, n = 5) {
   try {
     const r = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`, { headers: { 'User-Agent': 'Mozilla/5.0' } });
     if (!r.ok) return [];
     const xml = await r.text();
-    return [...xml.matchAll(/<yt:videoId>([\w-]{11})<\/yt:videoId>/g)].slice(0, 5).map(m => m[1]);
+    return [...xml.matchAll(/<yt:videoId>([\w-]{11})<\/yt:videoId>/g)].slice(0, n).map(m => m[1]);
   } catch { return []; }
 }
 
-async function refreshLive(channelIds) {
-  const lists = await Promise.all(channelIds.map(async id => [id, await recentVideoIds(id)]));
+// 레이블 공식 채널은 쇼츠·영상이 많아 방송이 최근 5개 밖으로 밀릴 수 있어 15개까지 확인
+async function refreshLive(channelIds, deepIds = new Set()) {
+  const lists = await Promise.all(channelIds.map(async id => [id, await recentVideoIds(id, deepIds.has(id) ? 15 : 5)]));
   const vidToCh = {};
   for (const [ch, vids] of lists) for (const v of vids) vidToCh[v] = ch;
   const vids = Object.keys(vidToCh), live = {};
@@ -105,7 +106,7 @@ module.exports = async (req, res) => {
           await setJSON(CH_KEY, ch);
           if (Date.now() - liveCache.at > LIVE_TTL) {
             const ids = [...new Set(urls.map(u => ch[u] && ch[u].id).filter(Boolean))];
-            liveCache = { at: Date.now(), live: await refreshLive(ids) };
+            liveCache = { at: Date.now(), live: await refreshLive(ids, new Set(labels.map(([, l]) => ch[l.ytUrl] && ch[l.ytUrl].id).filter(Boolean))) };
             await setJSON(LIVE_KEY, liveCache);
           }
         } finally { await redis(['DEL', LOCK_KEY]).catch(() => {}); }
