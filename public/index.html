@@ -183,6 +183,36 @@ h3{font-size:18px}
 .live-item .li-t{min-width:0;display:flex;flex-direction:column;gap:2px}
 .live-item .li-t b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .live-item .li-t span{font-size:12px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sx-month{display:flex;align-items:center;justify-content:center;gap:16px;margin:0 0 22px}
+.sx-month b{font-size:20px;min-width:9ch;text-align:center}
+.sx-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:30px}
+.sx-kpis>div{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--surface)}
+.sx-kpis small{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--mute)}
+.sx-kpis b{display:block;font-size:26px;line-height:1.2;margin-top:4px;font-variant-numeric:tabular-nums}
+.sx-kpis em{font-style:normal;font-size:13px;font-weight:500;color:var(--mute);margin-left:3px}
+.sx-ic{display:inline-block;width:16px;height:16px;vertical-align:-3px;margin-right:4px}
+.sx-ic svg,.sx-ic img{display:block;width:100%;height:100%}
+.sx-sec{margin-bottom:30px}
+.sx-head{display:flex;align-items:center;gap:10px;border-bottom:2px solid var(--lc);padding-bottom:10px;margin-bottom:4px}
+.sx-head .seal{width:34px;height:34px;font-size:13px}
+.sx-head h2{margin:0;font-size:18px}
+.sx-sum{margin-left:auto;font-size:13px;color:var(--mute)}
+.sx-row{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line-soft)}
+.sx-row.zero{opacity:.5}
+.sx-av{flex:none;position:relative;width:42px;height:42px;border-radius:50%;overflow:hidden;background:var(--surface-2);display:grid;place-items:center}
+.sx-av i{font-style:normal;font-weight:600;color:var(--mute)}
+.sx-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.sx-main{flex:1;min-width:0}
+.sx-name{display:flex;align-items:center;gap:6px;font-size:15px}
+.sx-off{font-size:11px;border:1px solid var(--line);border-radius:4px;padding:0 5px;color:var(--mute)}
+.sx-bar{height:5px;border-radius:3px;background:var(--surface-2);margin:5px 0 4px;max-width:320px}
+.sx-bar span{display:block;height:100%;border-radius:3px;background:var(--lc)}
+.sx-days{font-size:12px;color:var(--mute)}
+.sx-cnt{flex:none;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums}
+.sx-cnt span{display:flex;align-items:center}
+.sx-cnt b{font-size:22px;color:var(--ink);min-width:3.2ch;text-align:right}
+.sx-cnt small{font-size:12px;font-weight:500;color:var(--mute);margin-left:2px}
+@media (max-width:640px){.sx-kpis{grid-template-columns:repeat(2,1fr)}.sx-cnt span{display:none}.sx-cnt b{font-size:19px}}
 .li-av{position:relative;flex:none;display:block}
 .li-pbadge{position:absolute;right:-4px;bottom:-4px;width:22px;height:22px;border-radius:6px;background:#fff;padding:2px;box-shadow:0 1px 4px rgba(0,0,0,.25)}
 .li-pbadge svg,.li-pbadge img{display:block;width:100%;height:100%}
@@ -594,6 +624,7 @@ footer b{font-family:var(--f-display);letter-spacing:.14em;color:var(--mute)}
       <button data-go="hall">명예의 전당</button>
       <button data-go="board">게시판</button>
       <button data-go="apply">지원하기</button>
+      <button data-go="stats" id="navStats" hidden>방송 통계</button>
     </nav>
   </div>
 </header>
@@ -619,7 +650,7 @@ const S = {
   tab:'home', yt:{}, liveFilter:'all', labelId:null, memberFilter:'all', month:startOfMonth(new Date()), postId:null,
   applied:null, applyDone:false
 };
-const TABS = ['home','labels','members','schedule','hall','board','apply'];
+const TABS = ['home','labels','members','schedule','hall','board','apply','stats'];
 const app = document.getElementById('app');
 
 /* ---------- utils ---------- */
@@ -680,7 +711,9 @@ function render(){
   document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-current', b.dataset.go===S.tab?'page':'false'));
   document.getElementById('adminPill').hidden=!S.admin;
   const fa=document.getElementById('footAdmin'); if(fa) fa.hidden=!!S.admin;
-  const fn={home:viewHome, labels:S.labelId?viewLabel:viewLabels, members:viewMembers, schedule:viewSchedule, hall:viewHall, board:S.postId?viewPost:viewBoard, apply:viewApply}[S.tab];
+  const ns=document.getElementById('navStats'); if(ns) ns.hidden=!S.admin;
+  if(S.tab==='stats'&&!S.admin){ app.innerHTML=S.ready?viewHome():''; return; }
+  const fn={home:viewHome, labels:S.labelId?viewLabel:viewLabels, members:viewMembers, schedule:viewSchedule, hall:viewHall, board:S.postId?viewPost:viewBoard, apply:viewApply, stats:viewStats}[S.tab];
   app.innerHTML = fn();
 }
 function loadingNote(){ return S.ready?'':`<p class="lead">데이터를 불러오는 중…</p>`; }
@@ -996,6 +1029,58 @@ function viewHall(){
     ${S.labels.length?blocks:`<div class="empty">레이블이 등록되면 이곳에 시즌 기록이 표시돼요.</div>`}`;
 }
 
+/* 7. stats (관리자 전용) */
+function kstNow(){ return new Date(Date.now()+9*3600*1000); }
+function kstYm(t){ return new Date(t+9*3600*1000).toISOString().slice(0,7); }
+function kstDay(t){ return new Date(t+9*3600*1000).getUTCDate(); }
+function shiftYm(ym,d){ let [y,m]=ym.split('-').map(Number); m+=d; while(m<1){m+=12;y--;} while(m>12){m-=12;y++;} return y+'-'+pad(m); }
+async function loadStats(){
+  const ym=S.statMonth; S.stats={month:ym,loading:true,sessions:[]}; render();
+  let tok=null; try{ tok=localStorage.getItem('oho_admin'); }catch(e){}
+  try{ const r=await fetch('/api/livestats?month='+ym,{headers:tok?{Authorization:'Bearer '+tok}:{},cache:'no-store'}); const j=await r.json();
+    if(S.statMonth!==ym) return;
+    S.stats={month:ym,sessions:j.sessions||[],since:j.since,err:r.ok?(j.error||''):(j.error||'불러오지 못했어요')};
+  }catch(e){ if(S.statMonth===ym) S.stats={month:ym,sessions:[],err:'불러오지 못했어요'}; }
+  if(S.tab==='stats'&&!modalState) render();
+}
+function viewStats(){
+  if(!S.statMonth) S.statMonth=kstNow().toISOString().slice(0,7);
+  if(!S.stats||S.stats.month!==S.statMonth){ setTimeout(loadStats,0); S.stats={month:S.statMonth,loading:true,sessions:[]}; }
+  const st=S.stats, [y,mo]=S.statMonth.split('-').map(Number);
+  const isNow=S.statMonth===kstNow().toISOString().slice(0,7);
+  const by={}; // 멤버/레이블별 집계
+  for(const x of st.sessions){ const o=by[x.m]||(by[x.m]={yt:0,soop:0,etc:0,days:{}}); if(x.p==='youtube') o.yt++; else if(x.p==='soop') o.soop++; else o.etc++; const d=kstDay(x.b); o.days[d]=(o.days[d]||0)+1; }
+  const tot=(o)=>o?o.yt+o.soop+o.etc:0;
+  const all=st.sessions.length, ytN=st.sessions.filter(x=>x.p==='youtube').length, soopN=st.sessions.filter(x=>x.p==='soop').length;
+  const memIds=new Set(S.members.map(m=>m.id)); const active=Object.keys(by).filter(k=>memIds.has(k)).length;
+  const ic=(k)=>`<span class="sx-ic">${PICON[k]}</span>`;
+  const dayList=(o)=>Object.keys(o.days).map(Number).sort((a,b)=>a-b).map(d=>o.days[d]>1?`${d}일(${o.days[d]})`:`${d}일`).join(' · ');
+  const row=(name,photo,o,max,extra='')=>{ const n=tot(o); return `<div class="sx-row${n?'':' zero'}">
+      <span class="sx-av">${photo?`<img src="${esc(photo)}" alt="" onerror="this.remove()">`:''}<i>${initial(name)}</i></span>
+      <div class="sx-main"><div class="sx-name"><b>${esc(name)}</b>${extra}</div>
+        <div class="sx-bar"><span style="width:${n&&max?Math.max(4,n/max*100):0}%"></span></div>
+        <div class="sx-days">${n?'방송한 날: '+dayList(o):'이번 달 방송 기록 없음'}</div></div>
+      <div class="sx-cnt">${o&&o.yt?`<span>${ic('유튜브')}${o.yt}</span>`:''}${o&&o.soop?`<span>${ic('SOOP')}${o.soop}</span>`:''}${o&&o.etc?`<span>기타 ${o.etc}</span>`:''}<b>${n}<small>회</small></b></div>
+    </div>`; };
+  const groups=[...S.labels.map(l=>({l,mem:S.members.filter(m=>m.labelId===l.id)})), {l:null,mem:S.members.filter(m=>!label(m.labelId))}].filter(g=>g.mem.length||(g.l&&by['label:'+g.l.id]));
+  const sections=groups.map(g=>{
+    const mem=[...g.mem].sort((a,b)=>tot(by[b.id])-tot(by[a.id])||String(a.name).localeCompare(String(b.name),'ko'));
+    const max=Math.max(1,...mem.map(m=>tot(by[m.id])));
+    const off=g.l&&by['label:'+g.l.id];
+    const sum=mem.reduce((s,m)=>s+tot(by[m.id]),0);
+    return `<section class="sx-sec" style="--lc:${esc(g.l?.color||'#c9a45c')}">
+      <div class="sx-head">${g.l?seal(g.l):''}<h2>${esc(g.l?g.l.name:'레이블 미지정')}</h2><span class="sx-sum">멤버 방송 <b>${sum}</b>회</span></div>
+      ${off?row(g.l.name+' 공식 채널',(S.ytLabels||{})[g.l.id]?.photo||'',off,Math.max(max,tot(off)),'<span class="sx-off">공식</span>'):''}
+      ${mem.map(m=>row(m.name,mPhoto(m),by[m.id],max)).join('')}
+    </section>`; }).join('');
+  return `<div class="page-head"><div><div class="eyebrow">Stats</div><h1>방송 통계</h1><p class="lead">멤버가 한 달에 방송을 몇 번 했는지 보여줘요. 관리자에게만 보이는 페이지예요.</p></div></div>
+    <div class="sx-month"><button class="btn ghost sm" data-act="statMonth" data-id="-1" aria-label="이전 달">‹</button><b>${y}년 ${mo}월</b><button class="btn ghost sm" data-act="statMonth" data-id="1" aria-label="다음 달" ${isNow?'disabled':''}>›</button></div>
+    ${st.loading?`<p class="lead" style="text-align:center">불러오는 중…</p>`:st.err?`<div class="note-box">${esc(st.err)}</div>`:`
+    <div class="sx-kpis"><div><small>총 방송</small><b>${all}<em>회</em></b></div><div><small>방송한 멤버</small><b>${active}<em>/ ${S.members.length}명</em></b></div><div><small>${ic('유튜브')}유튜브</small><b>${ytN}<em>회</em></b></div><div><small>${ic('SOOP')}SOOP</small><b>${soopN}<em>회</em></b></div></div>
+    ${sections}`}
+    <div class="note-box" style="margin-top:28px;font-size:13px">방송 1회 = 유튜브 방송 영상 1개 또는 SOOP 방송 1번이에요. 같은 날 껐다 다시 켜면 2회로 세요.${st.since?` 기록은 ${esc(st.since.replace('-','년 '))}월부터 쌓이고 있어요.`:''}</div>`;
+}
+
 /* 5. board */
 function sortedPosts(){ return [...S.posts].sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)||(b.createdAt||0)-(a.createdAt||0)); }
 function viewBoard(){
@@ -1241,6 +1326,7 @@ document.addEventListener('click', async ev=>{
     case 'adminLogin': modalState={fields:[],data:{},images:{}}; modalRoot.innerHTML=`<div class="modal-bg" data-act="closeBg"><form class="modal" id="loginForm" style="width:min(380px,100%)" novalidate><h2>관리자 로그인</h2><div class="field"><label for="lg_pw">비밀번호</label><input type="password" id="lg_pw" autocomplete="current-password"></div><div class="msg" id="lgMsg" role="alert"></div><div class="modal-foot"><div class="r"><button type="button" class="btn ghost" data-act="closeModal">취소</button><button type="submit" class="btn gold">로그인</button></div></div></form></div>`; document.getElementById('lg_pw').focus(); break;
     case 'adminLogout': window.OHO.logout(); location.reload(); break;
     case 'liveFilter': S.liveFilter=id; render(); break;
+    case 'statMonth': S.statMonth=shiftYm(S.statMonth,Number(id)); loadStats(); break;
     case 'scrollLive': document.getElementById('liveNow')?.scrollIntoView({behavior:'smooth',block:'start'}); break;
     case 'memberFilter': S.memberFilter=id; render(); break;
     case 'month': { const d=+t.dataset.d; S.month=d===0?startOfMonth(new Date()):new Date(S.month.getFullYear(),S.month.getMonth()+d,1); render(); break; }
@@ -1343,7 +1429,7 @@ async function init(){
   S.ready=true; render();
   loadYT(); setInterval(()=>{ if(!document.hidden) loadYT(); },60000);
 }
-async function loadYT(){ try{ const r=await fetch('/api/youtube'); const j=await r.json(); S.yt=j.members||{}; S.ytLabels=j.labels||{}; if(!applyDirty()&&!modalState) render(); }catch(e){} }
+async function loadYT(){ fetch('/api/livestats').catch(()=>{}); try{ const r=await fetch('/api/youtube'); const j=await r.json(); S.yt=j.members||{}; S.ytLabels=j.labels||{}; if(!applyDirty()&&!modalState) render(); }catch(e){} }
 window.addEventListener('hashchange',()=>{ fromHash(); S.labelId=null; S.postId=null; S.memberId=null; render(); });
 setInterval(()=>{ if(S.tab==='home'&&!modalState) render(); },60000);
 setInterval(()=>{ const c=document.getElementById('hbCar'); if(c&&!c.matches(':hover')&&!modalState&&!document.hidden) bnGo((S.bnIdx||0)+1); },5000);
