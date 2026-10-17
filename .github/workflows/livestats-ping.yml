@@ -1,9 +1,9 @@
-# 5분마다 사이트의 방송 기록(api/livestats)을 불러서,
+# 10분마다 사이트의 방송 기록(api/livestats)을 불러서,
 # 아무도 사이트를 안 보고 있어도 방송 기록이 쌓이게 함
 name: Live stats ping
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '*/10 * * * *'
   workflow_dispatch:
 jobs:
   ping:
