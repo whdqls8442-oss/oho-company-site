@@ -199,6 +199,7 @@ h3{font-size:18px}
 .sx-sum{margin-left:auto;font-size:13px;color:var(--mute)}
 .sx-row{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line-soft)}
 .sx-row.zero{opacity:.5}
+.sx-name .badge-live{font-size:10px;padding:1px 6px}
 .sx-av{flex:none;position:relative;width:42px;height:42px;border-radius:50%;overflow:hidden;background:var(--surface-2);display:grid;place-items:center}
 .sx-av i{font-style:normal;font-weight:600;color:var(--mute)}
 .sx-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -1034,8 +1035,8 @@ function kstNow(){ return new Date(Date.now()+9*3600*1000); }
 function kstYm(t){ return new Date(t+9*3600*1000).toISOString().slice(0,7); }
 function kstDay(t){ return new Date(t+9*3600*1000).getUTCDate(); }
 function shiftYm(ym,d){ let [y,m]=ym.split('-').map(Number); m+=d; while(m<1){m+=12;y--;} while(m>12){m-=12;y++;} return y+'-'+pad(m); }
-async function loadStats(){
-  const ym=S.statMonth; S.stats={month:ym,loading:true,sessions:[]}; render();
+async function loadStats(quiet){
+  const ym=S.statMonth; if(!quiet){ S.stats={month:ym,loading:true,sessions:[]}; render(); }
   let tok=null; try{ tok=localStorage.getItem('oho_admin'); }catch(e){}
   try{ const r=await fetch('/api/livestats?month='+ym,{headers:tok?{Authorization:'Bearer '+tok}:{},cache:'no-store'}); const j=await r.json();
     if(S.statMonth!==ym) return;
@@ -1055,9 +1056,9 @@ function viewStats(){
   const memIds=new Set(S.members.map(m=>m.id)); const active=Object.keys(by).filter(k=>memIds.has(k)).length;
   const ic=(k)=>`<span class="sx-ic">${PICON[k]}</span>`;
   const dayList=(o)=>Object.keys(o.days).map(Number).sort((a,b)=>a-b).map(d=>o.days[d]>1?`${d}일(${o.days[d]})`:`${d}일`).join(' · ');
-  const row=(name,photo,o,max,extra='')=>{ const n=tot(o); return `<div class="sx-row${n?'':' zero'}">
+  const row=(name,photo,o,max,extra='',on=false)=>{ const n=tot(o); return `<div class="sx-row${n?'':' zero'}">
       <span class="sx-av">${photo?`<img src="${esc(photo)}" alt="" onerror="this.remove()">`:''}<i>${initial(name)}</i></span>
-      <div class="sx-main"><div class="sx-name"><b>${esc(name)}</b>${extra}</div>
+      <div class="sx-main"><div class="sx-name"><b>${esc(name)}</b>${extra}${on?'<span class="badge-live">LIVE</span>':''}</div>
         <div class="sx-bar"><span style="width:${n&&max?Math.max(4,n/max*100):0}%"></span></div>
         <div class="sx-days">${n?'방송한 날: '+dayList(o):'이번 달 방송 기록 없음'}</div></div>
       <div class="sx-cnt">${o&&o.yt?`<span>${ic('유튜브')}${o.yt}</span>`:''}${o&&o.soop?`<span>${ic('SOOP')}${o.soop}</span>`:''}${o&&o.etc?`<span>기타 ${o.etc}</span>`:''}<b>${n}<small>회</small></b></div>
@@ -1071,7 +1072,7 @@ function viewStats(){
     return `<section class="sx-sec" style="--lc:${esc(g.l?.color||'#c9a45c')}">
       <div class="sx-head">${g.l?seal(g.l):''}<h2>${esc(g.l?g.l.name:'레이블 미지정')}</h2><span class="sx-sum">멤버 방송 <b>${sum}</b>회</span></div>
       ${off?row(g.l.name+' 공식 채널',(S.ytLabels||{})[g.l.id]?.photo||'',off,Math.max(max,tot(off)),'<span class="sx-off">공식</span>'):''}
-      ${mem.map(m=>row(m.name,mPhoto(m),by[m.id],max)).join('')}
+      ${mem.map(m=>row(m.name,mPhoto(m),by[m.id],max,'',isLive(m))).join('')}
     </section>`; }).join('');
   return `<div class="page-head"><div><div class="eyebrow">Stats</div><h1>방송 통계</h1><p class="lead">멤버가 한 달에 방송을 몇 번 했는지 보여줘요. 관리자에게만 보이는 페이지예요.</p></div></div>
     <div class="sx-month"><button class="btn ghost sm" data-act="statMonth" data-id="-1" aria-label="이전 달">‹</button><b>${y}년 ${mo}월</b><button class="btn ghost sm" data-act="statMonth" data-id="1" aria-label="다음 달" ${isNow?'disabled':''}>›</button></div>
@@ -1429,7 +1430,7 @@ async function init(){
   S.ready=true; render();
   loadYT(); setInterval(()=>{ if(!document.hidden) loadYT(); },60000);
 }
-async function loadYT(){ fetch('/api/livestats').catch(()=>{}); try{ const r=await fetch('/api/youtube'); const j=await r.json(); S.yt=j.members||{}; S.ytLabels=j.labels||{}; if(!applyDirty()&&!modalState) render(); }catch(e){} }
+async function loadYT(){ fetch('/api/livestats').then(()=>{ if(S.tab==='stats'&&S.admin&&S.stats&&!S.stats.loading&&!modalState) loadStats(true); }).catch(()=>{}); try{ const r=await fetch('/api/youtube'); const j=await r.json(); S.yt=j.members||{}; S.ytLabels=j.labels||{}; if(!applyDirty()&&!modalState) render(); }catch(e){} }
 window.addEventListener('hashchange',()=>{ fromHash(); S.labelId=null; S.postId=null; S.memberId=null; render(); });
 setInterval(()=>{ if(S.tab==='home'&&!modalState) render(); },60000);
 setInterval(()=>{ const c=document.getElementById('hbCar'); if(c&&!c.matches(':hover')&&!modalState&&!document.hidden) bnGo((S.bnIdx||0)+1); },5000);
