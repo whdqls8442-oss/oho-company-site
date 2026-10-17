@@ -166,13 +166,16 @@ module.exports = async (req, res) => {
           if (Date.now() - liveCache.at > LIVE_TTL) {
             const ids = [...new Set(urls.map(u => ch[u] && ch[u].id).filter(Boolean))];
             const soopIds = [...new Set(members.map(([, m]) => m.soopUrl && parseSoop(m.soopUrl)).filter(Boolean))];
-            const soopDue = Date.now() - (liveCache.soopAt || 0) > SOOP_TTL;
+            // SOOP이 거절(한도 초과 등)하면 1시간 동안 SOOP 확인을 쉬었다가 다시 시도
+            const soopDue = Date.now() - (liveCache.soopAt || 0) > SOOP_TTL && Date.now() > (liveCache.soopPauseUntil || 0);
+            let soopFailed = false;
             const [live, soop] = await Promise.all([
               refreshLive(ids, new Set(labels.map(([, l]) => ch[l.ytUrl] && ch[l.ytUrl].id).filter(Boolean))),
-              soopDue ? refreshSoop(soopIds).catch((e) => { soopStat.err = String(e.message || e); return liveCache.soop || {}; }) : (liveCache.soop || {}),
+              soopDue ? refreshSoop(soopIds).catch((e) => { soopFailed = true; soopStat.err = String(e.message || e); return liveCache.soop || {}; }) : (liveCache.soop || {}),
             ]);
             liveCache = { at: Date.now(), live, soop,
-              soopAt: soopDue ? Date.now() : liveCache.soopAt, soopStat: soopDue ? soopStat : liveCache.soopStat };
+              soopAt: soopDue ? Date.now() : liveCache.soopAt, soopStat: soopDue ? soopStat : liveCache.soopStat,
+              soopPauseUntil: soopFailed ? Date.now() + 60 * 60 * 1000 : (liveCache.soopPauseUntil || 0) };
             await setJSON(LIVE_KEY, liveCache);
           }
         } finally { await redis(['DEL', LOCK_KEY]).catch(() => {}); }
@@ -200,6 +203,6 @@ module.exports = async (req, res) => {
       const lv = c.id && liveCache.live[c.id];
       labelOut[id] = { photo: c.photo || '', subs: c.subs ?? null, live: !!lv, liveUrl: lv ? `https://www.youtube.com/watch?v=${lv.videoId}` : '', liveTitle: lv ? lv.title : '', thumb: lv ? lv.thumb : '' };
     }
-    send(res, 200, { members: out, labels: labelOut, checkedAt: liveCache.at, soop: liveCache.soopStat || null, soopCheckedAt: liveCache.soopAt || null }, { 'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60' });
+    send(res, 200, { members: out, labels: labelOut, checkedAt: liveCache.at, soop: liveCache.soopStat || null, soopCheckedAt: liveCache.soopAt || null, soopPausedUntil: liveCache.soopPauseUntil > Date.now() ? liveCache.soopPauseUntil : null }, { 'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60' });
   } catch (e) { send(res, 200, { members: {}, error: String(e.message || e) }); }
 };
